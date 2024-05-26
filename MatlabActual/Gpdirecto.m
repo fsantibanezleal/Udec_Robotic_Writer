@@ -117,7 +117,7 @@ function varargout = Gpdirecto(varargin)
     guidata(hObject,handles);
     %% Movemos solo por seguridad... no seguridad del sistema sino para
     %% asegurar estar en home-.... jajajaja POR ESO DEBE SER    .... op,1,puerto....
-    [d1,A1,A2,A3,A4,A5]=DirectoG(0,0,0,0,0,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
+    [d1,A1,A2,A3,A4,A5]=DirectoG(0,0,0,0,0,op,1,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
         T5=A1*A2*A3*A4*A5;
         T4=A1*A2*A3*A4;
         T3=A1*A2*A3;
@@ -282,10 +282,10 @@ function varargout = Gpdirecto(varargin)
     function Hombro_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        if ( NewVal < -53.7 )
-            NewVal=-53.7;
-        elseif ( NewVal > 126.5 )
-            NewVal=126.5;
+        if ( NewVal < -120 )
+            NewVal=-120;
+        elseif ( NewVal > 63 )
+            NewVal=63;
         end     
         handles.Hombro=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -294,10 +294,10 @@ function varargout = Gpdirecto(varargin)
     function Codo_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        if ( NewVal < -27.8 )
-            NewVal=-27.8;
-        elseif ( NewVal > 77.7 )
-            NewVal=77.7;
+        if ( NewVal < -90 )
+            NewVal=-90;
+        elseif ( NewVal > 90 )
+            NewVal=90;
         end
         handles.Codo=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -308,8 +308,8 @@ function varargout = Gpdirecto(varargin)
         NewVal = str2double(NewStrVal); %Transformar a formato double
         if ( NewVal < -250 )
             NewVal=-250;
-        elseif ( NewVal > 77.7 )
-            NewVal=77.7;
+        elseif ( NewVal > 40 )
+            NewVal=40;
         end
         handles.Pitch=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -374,6 +374,7 @@ function varargout = Gpdirecto(varargin)
         ang3=handles.Codo;
         ang4=handles.Pitch;
         ang5=handles.Roll;
+        
         switch (handles.port)
             case    1,
                 puerto='Com1';
@@ -398,7 +399,6 @@ function varargout = Gpdirecto(varargin)
         end
 
         op=handles.Apertura;
-
     % Choose default command line output for Gpdirecto
         handles.output = hObject;
     
@@ -447,7 +447,10 @@ function varargout = Gpdirecto(varargin)
         clc;
         handles.output = hObject;
         guidata(hObject, handles);
-        Stop(puerto);
+            pause(6)
+            Stop(puerto);
+            pause(0.1)
+            Stop(puerto);
         clc;
     % --- Executes on button press in pushbutton2.Simular
     function pushbutton2_Callback(hObject, eventdata, handles)
@@ -555,8 +558,6 @@ function varargout = Gpdirecto(varargin)
                 puerto='Com1';
         end
 
-        op=handles.Apertura;
-
         % Choose default command line output for Gpdirecto
             handles.output = hObject;
 
@@ -596,6 +597,7 @@ function varargout = Gpdirecto(varargin)
         clc;
         handles.output = hObject;
         guidata(hObject, handles);
+        pause(10);
         Stop(puerto);
         
     % --- Executes on button press in Retorno.
@@ -603,6 +605,63 @@ function varargout = Gpdirecto(varargin)
         if (handles.Archivo ~= 0)
             fclose(handles.Archivo);
         end
+        
+        op=50;
+        handles.Base=0;
+        handles.Hombro=0;
+        handles.Codo=0;
+        handles.Pitch=0;
+        handles.Roll=0;
+        handles.Apertura=op; %op
+        guidata(hObject,handles);
+
+        ang1=handles.Base;
+        ang2=handles.Hombro;
+        ang3=handles.Codo;
+        ang4=handles.Pitch;
+        ang5=handles.Roll;
+        switch handles.port
+            case    1,
+                puerto='Com1';
+            case    2,
+                puerto='Com2';
+            case    3,
+                puerto='Com3';
+            case    4,
+                puerto='Com4';
+            case    5,
+                puerto='Com5';
+            case    6,
+                puerto='Com6';
+            case    7,
+                puerto='Com7';
+            case    8,
+                puerto='Com8';
+            case    9,
+                puerto='Com9';
+            otherwise
+                puerto='Com1';
+        end
+
+        % Choose default command line output for Gpdirecto
+            handles.output = hObject;
+
+        % Update handles structure
+            guidata(hObject, handles);
+
+        [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,1,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
+
+        handles.BaseAnt=handles.Base;
+        handles.HombroAnt=handles.Hombro;
+        handles.CodoAnt=handles.Codo;
+        handles.PitchAnt=handles.Pitch;
+        handles.RollAnt=handles.Roll;
+        handles.AperturaAnt=handles.Apertura;
+        clc;
+        handles.output = hObject;
+        guidata(hObject, handles);
+        pause(10);
+        Stop(puerto);
         clear all; 
         close all;
         clc; 
@@ -611,13 +670,13 @@ function varargout = Gpdirecto(varargin)
 
     % --- Executes on button press in Salvar.
     function Salvar_Callback(hObject, eventdata, handles)
-        ang1=handles.Base;
-        ang2=handles.Hombro;
-        ang3=handles.Codo;
-        ang4=handles.Pitch;
-        ang5=handles.Roll;
-        puerto=handles.Puerto;
-        op=handles.Apertura;
+        ang1=handles.Base
+        ang2=handles.Hombro
+        ang3=handles.Codo
+        ang4=handles.Pitch
+        ang5=handles.Roll
+        puerto=handles.Puerto
+        op=handles.Apertura
         if (handles.Archivo ~= 0)            
             [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
                 T5=A1*A2*A3*A4*A5;

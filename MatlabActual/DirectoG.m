@@ -6,13 +6,15 @@ function [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,Ejecutar,puert
 %   home
 %     ang1		=input(' ingrese angulo base   (grad) =');
 %     ang2		=input(' ingrese angulo hombro (grad) =');
-    ang2=ang2-90;
-    ang2Ant=ang2Ant-90;
+    ang2=ang2;
+    ang2Ant=ang2Ant;
 %     ang3		=input(' ingrese angulo codo   (grad) =');
     ang3		=ang3-ang2;
     ang3Ant		=ang3Ant-ang2Ant;
 %     ang4		=input(' ingrese angulo pitch  (grad) =');
+    an4=ang4;
     ang4		=ang4-ang3-ang2;
+    an4Ant=ang4Ant;
     ang4Ant		=ang4Ant-ang3Ant-ang2Ant;
 %     ang5		=input(' ingrese angulo roll   (grad) =');
 %     op			=input(' ingrese abertura (mm) =');
@@ -22,8 +24,6 @@ function [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,Ejecutar,puert
     theta2	=(ang2*pi)/180;
     theta3	=(ang3*pi)/180;
     theta4	=(ang4*pi)/180;
-    ang5    =ang5-90;
-    ang5Ant =ang5Ant-90;
     theta5	=(ang5*pi)/180;
 
     l1			=16;
@@ -78,7 +78,7 @@ function [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,Ejecutar,puert
                 0                   0                               0                   1		]   ;
 
     if Ejecutar == 1,
-        st=MotormovePR(round((ang4-ang4Ant)/0.458) ,'pitch',puerto);
+        st=MotormovePR(round(-(an4-an4Ant)/0.458) ,'pitch',puerto);
     end 
 
 % Matriz relacionada con el roll y el gripper
@@ -103,17 +103,7 @@ function [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,Ejecutar,puert
     T3=A1*A2*A3;
     T2=A1*A2;
     T1=A1;
-
-    
     
     x=[ 0 0  T1(1,4) T2(1,4) T3(1,4) T4(1,4) T5(1,4)];  
     y=[ 0 0  T1(2,4) T2(2,4) T3(2,4) T4(2,4) T5(2,4)];
-    z=[ 0 d1 T1(3,4) T2(3,4) T3(3,4) T4(3,4) T5(3,4)];
- 
-%     Dibujar(x,y,z);
-% 
-%     DibBase;
-%     Hombro(A1)
-%     CyM(A1*A2) 
-%     CyM(A1*A2*A3)
-%     Gripper(A1*A2*A3*A4*A5,op)     
+    z=[ 0 d1 T1(3,4) T2(3,4) T3(3,4) T4(3,4) T5(3,4)];  

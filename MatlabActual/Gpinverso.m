@@ -7,28 +7,28 @@ function varargout = Gpinverso(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-    % GPINVERSO M-file for Gpinverso.fig
-    %      GPINVERSO, by itself, creates a new GPINVERSO or raises the existing
+    % GPESCRITOR M-file for GpEscritor.fig
+    %      GPESCRITOR, by itself, creates a new GPESCRITOR or raises the existing
     %      singleton*.
     %
-    %      H = GPINVERSO returns the handle to a new GPINVERSO or the handle to
+    %      H = GPESCRITOR returns the handle to a new GPESCRITOR or the handle to
     %      the existing singleton*.
     %
-    %      GPINVERSO('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in GPINVERSO.M with the given input arguments.
+    %      GPESCRITOR('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in GPESCRITOR.M with the given input arguments.
     %
-    %      GPINVERSO('Property','Value',...) creates a new GPINVERSO or raises the
+    %      GPESCRITOR('Property','Value',...) creates a new GPESCRITOR or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before Gpinverso_OpeningFunction gets called.  An
+    %      applied to the GUI before GpEscritor_OpeningFunction gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to Gpinverso_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to GpEscritor_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
     
-    % Edit the above text to modify the response to help Gpinverso
+    % Edit the above text to modify the response to help GpEscritor
 
     % Last Modified by GUIDE v2.5 31-Oct-2007 12:05:08
 
@@ -37,8 +37,8 @@ function varargout = Gpinverso(varargin)
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @Gpinverso_OpeningFcn, ...
-                       'gui_OutputFcn',  @Gpinverso_OutputFcn, ...
+                       'gui_OpeningFcn', @GpEscritor_OpeningFcn, ...
+                       'gui_OutputFcn',  @GpEscritor_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin & isstr(varargin{1})
@@ -67,14 +67,14 @@ function varargout = Gpinverso(varargin)
     global  op;
 
 
-    % --- Executes just before Gpinverso is made visible.
+    % --- Executes just before GpEscritor is made visible.
     
-    function Gpinverso_OpeningFcn(hObject, eventdata, handles, varargin)
+    function GpEscritor_OpeningFcn(hObject, eventdata, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to Gpinverso (see VARARGIN)
+    % varargin   command line arguments to GpEscritor (see VARARGIN)
 
     %Colocar Imagen de fondo
     back= imread('fondo.jpg'); %Leer imagen
@@ -112,12 +112,14 @@ function varargout = Gpinverso(varargin)
     handles.RollAnt=0;
     handles.AperturaAnt=op; %op
     puerto='Com1';
+    handles.Ubicacion=1;
     handles.Nombre='Posiciones.txt';
+
     
     guidata(hObject,handles);
     %% Movemos solo por seguridad... no seguridad del sistema sino para
     %% asegurar estar en home-.... jajajaja POR ESO DEBE SER    .... op,1,puerto....
-    [d1,A1,A2,A3,A4,A5]=DirectoG(0,0,0,0,0,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
+    [d1,A1,A2,A3,A4,A5]=DirectoG(0,0,0,0,0,op,1,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
         T5=A1*A2*A3*A4*A5;
         T4=A1*A2*A3*A4;
         T3=A1*A2*A3;
@@ -152,20 +154,18 @@ function varargout = Gpinverso(varargin)
     pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
     %Stop(puerto);
     clc;
-    
-    handles.Archivo = fopen('Posiciones.txt','wb');
-    % Choose default command line output for Gpinverso
+    % Choose default command line output for GpEscritor
     handles.output = hObject;
     
     % Update handles structure
     guidata(hObject, handles);
 
-    % UIWAIT makes Gpinverso wait for user response (see UIRESUME)
+    % UIWAIT makes GpEscritor wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 
 
     % --- Outputs from this function are returned to the command line.
-    function varargout = Gpinverso_OutputFcn(hObject, eventdata, handles)
+    function varargout = GpEscritor_OutputFcn(hObject, eventdata, handles)
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -282,10 +282,10 @@ function varargout = Gpinverso(varargin)
     function Hombro_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        if ( NewVal < -53.7 )
-            NewVal=-53.7;
-        elseif ( NewVal > 126.5 )
-            NewVal=126.5;
+        if ( NewVal < -120 )
+            NewVal=-120;
+        elseif ( NewVal > 63 )
+            NewVal=63;
         end     
         handles.Hombro=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -294,10 +294,10 @@ function varargout = Gpinverso(varargin)
     function Codo_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        if ( NewVal < -27.8 )
-            NewVal=-27.8;
-        elseif ( NewVal > 77.7 )
-            NewVal=77.7;
+        if ( NewVal < -90 )
+            NewVal=-90;
+        elseif ( NewVal > 90 )
+            NewVal=90;
         end
         handles.Codo=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -308,8 +308,8 @@ function varargout = Gpinverso(varargin)
         NewVal = str2double(NewStrVal); %Transformar a formato double
         if ( NewVal < -250 )
             NewVal=-250;
-        elseif ( NewVal > 77.7 )
-            NewVal=77.7;
+        elseif ( NewVal > 40 )
+            NewVal=40;
         end
         handles.Pitch=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -399,7 +399,7 @@ function varargout = Gpinverso(varargin)
 
         op=handles.Apertura;
 
-    % Choose default command line output for Gpinverso
+    % Choose default command line output for GpEscritor
         handles.output = hObject;
     
     % Update handles structure
@@ -424,7 +424,7 @@ function varargout = Gpinverso(varargin)
         handles.RollAnt=handles.Roll;
         handles.AperturaAnt=handles.Apertura;
 
-    % Choose default command line output for Gpinverso
+    % Choose default command line output for GpEscritor
         handles.output = hObject;
     
     % Update handles structure
@@ -447,6 +447,7 @@ function varargout = Gpinverso(varargin)
         clc;
         handles.output = hObject;
         guidata(hObject, handles);
+        pause(6);
         Stop(puerto);
         clc;
     % --- Executes on button press in pushbutton2.Simular
@@ -495,7 +496,7 @@ function varargout = Gpinverso(varargin)
         y=[ 0 0  T1(2,4) T2(2,4) T3(2,4) T4(2,4) T5(2,4)];
         z=[ 0 d1 T1(3,4) T2(3,4) T3(3,4) T4(3,4) T5(3,4)];
 
-        % Choose default command line output for Gpinverso
+        % Choose default command line output for GpEscritor
             handles.output = hObject;
 
         % Update handles structure
@@ -558,7 +559,7 @@ function varargout = Gpinverso(varargin)
 
         op=handles.Apertura;
 
-        % Choose default command line output for Gpinverso
+        % Choose default command line output for GpEscritor
             handles.output = hObject;
 
         % Update handles structure
@@ -597,13 +598,11 @@ function varargout = Gpinverso(varargin)
         clc;
         handles.output = hObject;
         guidata(hObject, handles);
+        pause(10);
         Stop(puerto);
         
     % --- Executes on button press in Retorno.
     function Retorno_Callback(hObject, eventdata, handles)
-        if (handles.Archivo ~= 0)
-            fclose(handles.Archivo);
-        end
         clear all; 
         close all;
         clc; 
@@ -611,19 +610,27 @@ function varargout = Gpinverso(varargin)
         
     % --- Executes on button press in Anterior.
     function Anterior_Callback(hObject, eventdata, handles)
-
+        handles.Ubicacion=handles.Ubicacion-3;
+        if handles.Ubicacion < 1
+           handles.Ubicacion=1;
+        end
+        handles.output = hObject;
+        guidata(hObject, handles);       
+        
     % --- Executes on button press in Siguiente.
     function Siguiente_Callback(hObject, eventdata, handles)
+        Alfa=load(handles.Nombre);
+        largo=length(Alfa(:,4));
+        handles.Ubicacion=handles.Ubicacion+3;
+        if  handles.Ubicacion > largo
+            handles.Ubicacion=handles.Ubicacion-3;
+        end
+        handles.output = hObject;
+        guidata(hObject, handles);        
 
-        
     % --- Executes on button press in Ubicar.
     function Ubicar_Callback(hObject, eventdata, handles)
-AQUI va el inverso de la matriz T% qye me pasa alejandro
-        ang1=handles.Base;
-        ang2=handles.Hombro;
-        ang3=handles.Codo;
-        ang4=handles.Pitch;
-        ang5=handles.Roll;
+        
         switch (handles.port)
             case    1,
                 puerto='Com1';
@@ -647,12 +654,62 @@ AQUI va el inverso de la matriz T% qye me pasa alejandro
                 puerto='Com1';
         end
 
+        Alfa=load(handles.Nombre);
+        Posicion=handles.Ubicacion;
+        T5=Alfa(Posicion:Posicion+2,:);       
+        
+        [ang1,ang2,ang3,ang4,ang5]=InversoG(T5,puerto)
         op=handles.Apertura;
         handles.output = hObject;
         guidata(hObject, handles);
 
-        %Colocar Imagen brazo
-        [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
+        
+    l1			=16;
+    l2			=220;
+    l3			=220;
+
+%   Matriz de la relacion existente entre base y hombro
+    alpha1  = -pi/2;
+    d1		= 340;
+    a1		= l1;
+    A1=[    cos(theta1)  -cos(alpha1)*sin(theta1)	  	sin(alpha1)*sin(theta1) 	a1*cos(theta1)  ;
+            sin(theta1)   cos(alpha1)*cos(theta1)       -sin(alpha1)*cos(theta1) 	a1*sin(theta1)  ;
+                0		          sin(alpha1)	                cos(alpha1)              d1         ;
+                0		              0                              0                    1		]   ;
+                alpha2  = 0;
+    d2		= 0;
+    a2		= l2;
+    A2=[    cos(theta2)  -cos(alpha2)*sin(theta2)	  	sin(alpha2)*sin(theta2) 	a2*cos(theta2)  ;
+            sin(theta2)   cos(alpha2)*cos(theta2)       -sin(alpha2)*cos(theta2) 	a2*sin(theta2)  ;
+                0		          sin(alpha2)	                cos(alpha2)             d2          ;
+                0		              0                              0                  1		]   ;
+         Matriz de la relacion existente entre codo y muñeca
+    alpha3  = 0;
+    d3		= 0;
+    a3		= l2;
+    A3=[    cos(theta3)  -cos(alpha3)*sin(theta3)	  	sin(alpha3)*sin(theta3) 	a3*cos(theta3)  ;
+            sin(theta3)   cos(alpha3)*cos(theta3)       -sin(alpha3)*cos(theta3) 	a3*sin(theta3)  ;
+                0		          sin(alpha3)	                cos(alpha3)             d3          ;
+                0		              0                             0                   1		]   ;
+
+  alpha4  = -pi/2;
+    d4		= 0;
+    a4		= 0;
+    A4=[    cos(theta4)  -cos(alpha4)*sin(theta4)	  	sin(alpha4)*sin(theta4) 	a4*cos(theta4)  ;
+            sin(theta4)   cos(alpha4)*cos(theta4)       -sin(alpha4)*cos(theta4) 	a4*sin(theta4)  ;
+                0               sin(alpha4)                     cos(alpha4)             d4          ;
+                0                   0                               0                   1		]   ;
+            
+    alpha5  = 0;     
+    d5		= 151;
+    a5		= 0;
+    A5=[    cos(theta5)  -cos(alpha5)*sin(theta5)	  	sin(alpha5)*sin(theta5)     a5*cos(theta5)  ;
+            sin(theta5)   cos(alpha5)*cos(theta5)       -sin(alpha5)*cos(theta5) 	a5*sin(theta5)  ;
+                0               sin(alpha5)                     cos(alpha5)             d5          ;
+                0                   0                               0                    1		]   ;
+                            
+        
+        
             T5=A1*A2*A3*A4*A5;
             T4=A1*A2*A3*A4;
             T3=A1*A2*A3;
@@ -662,16 +719,22 @@ AQUI va el inverso de la matriz T% qye me pasa alejandro
         x=[ 0 0  T1(1,4) T2(1,4) T3(1,4) T4(1,4) T5(1,4)];  
         y=[ 0 0  T1(2,4) T2(2,4) T3(2,4) T4(2,4) T5(2,4)];
         z=[ 0 d1 T1(3,4) T2(3,4) T3(3,4) T4(3,4) T5(3,4)];
+        handles.BaseAnt=ang1;
+        handles.HombroAnt=ang2;
+        handles.CodoAnt=ang3;
+        handles.PitchAnt=ang4;       
+        handles.RollAnt=ang5;
+        handles.AperturaAnt=op;
 
-        % Choose default command line output for Gpinverso
+        % Choose default command line output for GpEscritor
             handles.output = hObject;
 
         % Update handles structure
-            guidata(hObject, handles);
+        guidata(hObject, handles);
 
-            axes(handles.Brazo); %Carga la imagen en background
-            pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
-            pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
+        axes(handles.Brazo); %Carga la imagen en background
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
         axes(handles.Brazo1); %Carga la imagen    
         pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
@@ -684,62 +747,7 @@ AQUI va el inverso de la matriz T% qye me pasa alejandro
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
         clc;
-
-    % --- Executes on button press in Ubicar.
-    function Ubicar_Callback(hObject, eventdata, handles)
-        ang1=handles.Base;
-        ang2=handles.Hombro;
-        ang3=handles.Codo;
-        ang4=handles.Pitch;
-        ang5=handles.Roll;
-        puerto=handles.Puerto;
-        op=handles.Apertura;
-        if (handles.Archivo ~= 0)            
-            [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
-                T5=A1*A2*A3*A4*A5;
-                T4=A1*A2*A3*A4;
-                T3=A1*A2*A3;
-                T2=A1*A2;
-                T1=A1;
-    
-            for i=1:3,
-                for j=1:4,
-                    fprintf(handles.Archivo,'%6.4f %t',T5(i,j));
-                end
-                fprintf(handles.Archivo,'\n');
-            end
-        
-            fprintf(handles.Archivo,'\n');
-            fprintf(handles.Archivo,'\n');
-        end
-        
-        handles.output = hObject;
-        guidata(hObject, handles);
-        
-
-    function OpenFile_Callback(hObject, eventdata, handles)
-        archivo=handles.Nombre;
-        handles.Archivo = fopen(archivo,'wb');
-        handles.output = hObject;
-        guidata(hObject, handles);
-        
-    function CloseFile_Callback(hObject, eventdata, handles)
-        if (handles.Archivo ~=0)
-            fclose(handles.Archivo);
-            handles.Archivo= 0;
-        end
-        handles.output = hObject;
-        guidata(hObject, handles);
-        
-    function DeleteFile_Callback(hObject, eventdata, handles)
-        if (handles.Archivo ~=0)
-            fclose(handles.Archivo);
-            handles.Archivo= 0;
-        end
-        archivo=handles.Nombre;
-        delete(archivo);
-        handles.output = hObject;
-        guidata(hObject, handles);
+   
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
