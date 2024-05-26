@@ -1,4 +1,4 @@
-function varargout = Gpdirecto(varargin)
+function varargout = GpEscritor(varargin)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,38 +7,38 @@ function varargout = Gpdirecto(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-    % GPDIRECTO M-file for Gpdirecto.fig
-    %      GPDIRECTO, by itself, creates a new GPDIRECTO or raises the existing
+    % GPESCRITOR M-file for GpEscritor.fig
+    %      GPESCRITOR, by itself, creates a new GPESCRITOR or raises the existing
     %      singleton*.
     %
-    %      H = GPDIRECTO returns the handle to a new GPDIRECTO or the handle to
+    %      H = GPESCRITOR returns the handle to a new GPESCRITOR or the handle to
     %      the existing singleton*.
     %
-    %      GPDIRECTO('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in GPDIRECTO.M with the given input arguments.
+    %      GPESCRITOR('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in GPESCRITOR.M with the given input arguments.
     %
-    %      GPDIRECTO('Property','Value',...) creates a new GPDIRECTO or raises the
+    %      GPESCRITOR('Property','Value',...) creates a new GPESCRITOR or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before Gpdirecto_OpeningFunction gets called.  An
+    %      applied to the GUI before GpEscritor_OpeningFunction gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to Gpdirecto_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to GpEscritor_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
     
-    % Edit the above text to modify the response to help Gpdirecto
+    % Edit the above text to modify the response to help GpEscritor
 
-    % Last Modified by GUIDE v2.5 28-Oct-2007 15:32:23
+    % Last Modified by GUIDE v2.5 31-Oct-2007 12:05:08
 
     % Begin initialization code - DO NOT EDIT
 
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @Gpdirecto_OpeningFcn, ...
-                       'gui_OutputFcn',  @Gpdirecto_OutputFcn, ...
+                       'gui_OpeningFcn', @GpEscritor_OpeningFcn, ...
+                       'gui_OutputFcn',  @GpEscritor_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin & isstr(varargin{1})
@@ -67,14 +67,14 @@ function varargout = Gpdirecto(varargin)
     global  op;
 
 
-    % --- Executes just before Gpdirecto is made visible.
+    % --- Executes just before GpEscritor is made visible.
     
-    function Gpdirecto_OpeningFcn(hObject, eventdata, handles, varargin)
+    function GpEscritor_OpeningFcn(hObject, eventdata, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to Gpdirecto (see VARARGIN)
+    % varargin   command line arguments to GpEscritor (see VARARGIN)
 
     %Colocar Imagen de fondo
     back= imread('fondo.jpg'); %Leer imagen
@@ -92,11 +92,7 @@ function varargout = Gpdirecto(varargin)
     axes(handles.archivar); %Carga la imagen en background
     axis off;
     imshow(archivar); %Presenta la imagen
-
-    
-    delete('Posiciones.txt');
-    handles.Archivo = fopen('Posiciones.txt','wb');
-
+   
     handles.output = hObject;
     % Update handles structure
     guidata(hObject, handles);
@@ -116,11 +112,14 @@ function varargout = Gpdirecto(varargin)
     handles.RollAnt=0;
     handles.AperturaAnt=op; %op
     puerto='Com1';
+    handles.Ubicacion=1;
+    handles.Nombre='Posiciones.txt';
+
     
     guidata(hObject,handles);
     %% Movemos solo por seguridad... no seguridad del sistema sino para
     %% asegurar estar en home-.... jajajaja POR ESO DEBE SER    .... op,1,puerto....
-    [d1,A1,A2,A3,A4,A5]=DirectoG(0,0,0,0,0,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
+    [d1,A1,A2,A3,A4,A5]=DirectoG(0,0,0,0,0,op,1,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
         T5=A1*A2*A3*A4*A5;
         T4=A1*A2*A3*A4;
         T3=A1*A2*A3;
@@ -133,34 +132,40 @@ function varargout = Gpdirecto(varargin)
     axes(handles.Brazo); %Carga la imagen  
     pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
     pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
+    clc;    
     pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
     axes(handles.Brazo1); %Carga la imagen    
     pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
+    clc;    
     pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
+    clc;
     pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
     axes(handles.Brazo2); %Carga la imagen   
     pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);        
+    clc;    
     pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);        
+    clc;
     pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);        
     axes(handles.Brazo3); %Carga la imagen   
     pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+    clc;
     pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+    clc;
     pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
-    Stop(puerto);
-    
-    handles.Archivo = fopen('Posiciones.txt','wb');
-    % Choose default command line output for Gpdirecto
+    %Stop(puerto);
+    clc;
+    % Choose default command line output for GpEscritor
     handles.output = hObject;
     
     % Update handles structure
     guidata(hObject, handles);
 
-    % UIWAIT makes Gpdirecto wait for user response (see UIRESUME)
+    % UIWAIT makes GpEscritor wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 
 
     % --- Outputs from this function are returned to the command line.
-    function varargout = Gpdirecto_OutputFcn(hObject, eventdata, handles)
+    function varargout = GpEscritor_OutputFcn(hObject, eventdata, handles)
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -277,10 +282,10 @@ function varargout = Gpdirecto(varargin)
     function Hombro_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        if ( NewVal < -53.7 )
-            NewVal=-53.7;
-        elseif ( NewVal > 126.5 )
-            NewVal=126.5;
+        if ( NewVal < -120 )
+            NewVal=-120;
+        elseif ( NewVal > 63 )
+            NewVal=63;
         end     
         handles.Hombro=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -289,10 +294,10 @@ function varargout = Gpdirecto(varargin)
     function Codo_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        if ( NewVal < -27.8 )
-            NewVal=-27.8;
-        elseif ( NewVal > 77.7 )
-            NewVal=77.7;
+        if ( NewVal < -90 )
+            NewVal=-90;
+        elseif ( NewVal > 90 )
+            NewVal=90;
         end
         handles.Codo=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -303,8 +308,8 @@ function varargout = Gpdirecto(varargin)
         NewVal = str2double(NewStrVal); %Transformar a formato double
         if ( NewVal < -250 )
             NewVal=-250;
-        elseif ( NewVal > 77.7 )
-            NewVal=77.7;
+        elseif ( NewVal > 40 )
+            NewVal=40;
         end
         handles.Pitch=NewVal; %Almacenar en puntero
         handles.output = hObject;
@@ -337,12 +342,13 @@ function varargout = Gpdirecto(varargin)
     function Puerto_Callback(hObject, eventdata, handles)
         NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
         NewVal = str2double(NewStrVal); %Transformar a formato double
-        handles.Port=NewVal
+        handles.Port=NewVal;
         handles.output = hObject;
         guidata(hObject, handles);
 
-
     function nombrearchivo_Callback(hObject, eventdata, handles)
+        NewStrVal=get(hObject,'String'); %Almacenar valor ingresado
+        handles.Nombre=NewStrVal;        
         handles.output = hObject;
         guidata(hObject, handles);
 
@@ -368,10 +374,32 @@ function varargout = Gpdirecto(varargin)
         ang3=handles.Codo;
         ang4=handles.Pitch;
         ang5=handles.Roll;
-        puerto=handles.port;
+        switch (handles.port)
+            case    1,
+                puerto='Com1';
+            case    2,
+                puerto='Com2';
+            case    3,
+                puerto='Com3';
+            case    4,
+                puerto='Com4';
+            case    5,
+                puerto='Com5';
+            case    6,
+                puerto='Com6';
+            case    7,
+                puerto='Com7';
+            case    8,
+                puerto='Com8';
+            case    9,
+                puerto='Com9';
+            otherwise
+                puerto='Com1';
+        end
+
         op=handles.Apertura;
 
-    % Choose default command line output for Gpdirecto
+    % Choose default command line output for GpEscritor
         handles.output = hObject;
     
     % Update handles structure
@@ -396,7 +424,7 @@ function varargout = Gpdirecto(varargin)
         handles.RollAnt=handles.Roll;
         handles.AperturaAnt=handles.Apertura;
 
-    % Choose default command line output for Gpdirecto
+    % Choose default command line output for GpEscritor
         handles.output = hObject;
     
     % Update handles structure
@@ -408,15 +436,20 @@ function varargout = Gpdirecto(varargin)
         axes(handles.Brazo1); %Carga la imagen    
         pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
-        axes(handles.Brazo2); %Carga la imagen   
+        axes(handles.Brazo2); %Carga la imagen  
+        clc;
         pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);
+        clc;
         axes(handles.Brazo3); %Carga la imagen   
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+        clc;
         handles.output = hObject;
         guidata(hObject, handles);
+        pause(6);
         Stop(puerto);
+        clc;
     % --- Executes on button press in pushbutton2.Simular
     function pushbutton2_Callback(hObject, eventdata, handles)
         ang1=handles.Base;
@@ -424,7 +457,29 @@ function varargout = Gpdirecto(varargin)
         ang3=handles.Codo;
         ang4=handles.Pitch;
         ang5=handles.Roll;
-        puerto=handles.port;
+        switch (handles.port)
+            case    1,
+                puerto='Com1';
+            case    2,
+                puerto='Com2';
+            case    3,
+                puerto='Com3';
+            case    4,
+                puerto='Com4';
+            case    5,
+                puerto='Com5';
+            case    6,
+                puerto='Com6';
+            case    7,
+                puerto='Com7';
+            case    8,
+                puerto='Com8';
+            case    9,
+                puerto='Com9';
+            otherwise
+                puerto='Com1';
+        end
+
         op=handles.Apertura;
         handles.output = hObject;
         guidata(hObject, handles);
@@ -441,7 +496,7 @@ function varargout = Gpdirecto(varargin)
         y=[ 0 0  T1(2,4) T2(2,4) T3(2,4) T4(2,4) T5(2,4)];
         z=[ 0 d1 T1(3,4) T2(3,4) T3(3,4) T4(3,4) T5(3,4)];
 
-        % Choose default command line output for Gpdirecto
+        % Choose default command line output for GpEscritor
             handles.output = hObject;
 
         % Update handles structure
@@ -453,12 +508,16 @@ function varargout = Gpdirecto(varargin)
         axes(handles.Brazo1); %Carga la imagen    
         pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
+        clc;
         axes(handles.Brazo2); %Carga la imagen   
         pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);
+        clc;
         axes(handles.Brazo3); %Carga la imagen   
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+        clc;
+        
     % --- Executes on button press in Resetear.
     function Resetear_Callback(hObject, eventdata, handles)
         op=50;
@@ -475,10 +534,32 @@ function varargout = Gpdirecto(varargin)
         ang3=handles.Codo;
         ang4=handles.Pitch;
         ang5=handles.Roll;
-        puerto=handles.port;
+        switch handles.port
+            case    1,
+                puerto='Com1';
+            case    2,
+                puerto='Com2';
+            case    3,
+                puerto='Com3';
+            case    4,
+                puerto='Com4';
+            case    5,
+                puerto='Com5';
+            case    6,
+                puerto='Com6';
+            case    7,
+                puerto='Com7';
+            case    8,
+                puerto='Com8';
+            case    9,
+                puerto='Com9';
+            otherwise
+                puerto='Com1';
+        end
+
         op=handles.Apertura;
 
-        % Choose default command line output for Gpdirecto
+        % Choose default command line output for GpEscritor
             handles.output = hObject;
 
         % Update handles structure
@@ -514,60 +595,117 @@ function varargout = Gpdirecto(varargin)
         axes(handles.Brazo3); %Carga la imagen   
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
         pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+        clc;
         handles.output = hObject;
         guidata(hObject, handles);
+        pause(10);
         Stop(puerto);
         
     % --- Executes on button press in Retorno.
     function Retorno_Callback(hObject, eventdata, handles)
-        fclose(handles.Archivo);
         clear all; 
         close all;
         clc; 
         GMenu;
+        
+    % --- Executes on button press in Anterior.
+    function Anterior_Callback(hObject, eventdata, handles)
+        handles.Ubicacion=handles.Ubicacion-3;
+        if handles.Ubicacion < 1
+           handles.Ubicacion=1;
+        end
+        handles.output = hObject;
+        guidata(hObject, handles);       
+        
+    % --- Executes on button press in Siguiente.
+    function Siguiente_Callback(hObject, eventdata, handles)
+        Alfa=load(handles.Nombre);
+        largo=length(Alfa(:,4));
+        handles.Ubicacion=handles.Ubicacion+3;
+        if  handles.Ubicacion > largo
+            handles.Ubicacion=handles.Ubicacion-3;
+        end
+        handles.output = hObject;
+        guidata(hObject, handles);        
 
+    % --- Executes on button press in Ubicar.
+    function Ubicar_Callback(hObject, eventdata, handles)
+        
+        switch (handles.port)
+            case    1,
+                puerto='Com1';
+            case    2,
+                puerto='Com2';
+            case    3,
+                puerto='Com3';
+            case    4,
+                puerto='Com4';
+            case    5,
+                puerto='Com5';
+            case    6,
+                puerto='Com6';
+            case    7,
+                puerto='Com7';
+            case    8,
+                puerto='Com8';
+            case    9,
+                puerto='Com9';
+            otherwise
+                puerto='Com1';
+        end
 
-    % --- Executes on button press in Salvar.
-    function Salvar_Callback(hObject, eventdata, handles)
-        ang1=handles.Base;
-        ang2=handles.Hombro;
-        ang3=handles.Codo;
-        ang4=handles.Pitch;
-        ang5=handles.Roll;
-        puerto=handles.Puerto;
+        Alfa=load(handles.Nombre);
+        Posicion=handles.Ubicacion;
+        T5=Alfa(Posicion:Posicion+2,:);       
+        
+        [ang1,ang2,ang3,ang4,ang5]=InversoG(T5,puerto);
+
+        ang4 = ang4+ang3+ang2;  
+        ang3 = ang3+ang2;
+              
         op=handles.Apertura;
-
-        [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,0,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
+        handles.output = hObject;
+        guidata(hObject, handles);
+        %Colocar Imagen brazo
+        [d1,A1,A2,A3,A4,A5]=DirectoG(ang1,ang2,ang3,ang4,ang5,op,1,puerto,handles.BaseAnt,handles.HombroAnt,handles.CodoAnt,handles.PitchAnt,handles.RollAnt,handles.AperturaAnt);
             T5=A1*A2*A3*A4*A5;
             T4=A1*A2*A3*A4;
             T3=A1*A2*A3;
             T2=A1*A2;
             T1=A1;
 
-        for i=1:3,
-            for j=1:4,
-                fprintf(handles.Archivo,'%6.4f %t',T5(i,j));
-            end
-            fprintf(handles.Archivo,'\n');
-        end
-        
-        fprintf(handles.Archivo,'\n');
-        fprintf(handles.Archivo,'\n');
-        handles.output = hObject;
+        x=[ 0 0  T1(1,4) T2(1,4) T3(1,4) T4(1,4) T5(1,4)];  
+        y=[ 0 0  T1(2,4) T2(2,4) T3(2,4) T4(2,4) T5(2,4)];
+        z=[ 0 d1 T1(3,4) T2(3,4) T3(3,4) T4(3,4) T5(3,4)];
+        handles.BaseAnt=ang1;
+        handles.HombroAnt=ang2;
+        handles.CodoAnt=ang3;
+        handles.PitchAnt=ang4;       
+        handles.RollAnt=ang5;
+        handles.AperturaAnt=op;
+
+        % Choose default command line output for GpEscritor
+            handles.output = hObject;
+
+        % Update handles structure
         guidata(hObject, handles);
-        
 
-    function OpenFile_Callback(hObject, eventdata, handles)
-
-
-    function CloseFile_Callback(hObject, eventdata, handles)
-
-
-
-    function DeleteFile_Callback(hObject, eventdata, handles)
+        axes(handles.Brazo); %Carga la imagen en background
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,112.5,30);
+        axes(handles.Brazo1); %Carga la imagen    
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,180,90);
+        clc;
+        axes(handles.Brazo2); %Carga la imagen   
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,90,0);
+        clc;
+        axes(handles.Brazo3); %Carga la imagen   
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+        pintar(T1,T2,T3,T4,T5,op,x,y,z,0,0);
+        clc;
    
-        
-        
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
