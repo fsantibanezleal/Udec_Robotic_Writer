@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="ax" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E53935"/>
+    </marker>
+    <marker id="ay" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#43A047"/>
+    </marker>
+    <marker id="az" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1E88E5"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">Scorbot III — Denavit-Hartenberg Frames (Side View)</text>
+
+  <!-- Ground -->
+  <rect x="50" y="400" width="700" height="10" fill="#8D6E63" rx="3"/>
+
+  <!-- Base (Frame 0) -->
+  <rect x="345" y="360" width="110" height="40" rx="5" fill="#607D8B" stroke="#37474F" stroke-width="2"/>
+  <text x="400" y="385" text-anchor="middle" font-size="11" fill="white" font-weight="bold">Base</text>
+
+  <!-- Frame 0 axes -->
+  <line x1="400" y1="360" x2="440" y2="360" stroke="#E53935" stroke-width="2" marker-end="url(#ax)"/>
+  <line x1="400" y1="360" x2="400" y2="320" stroke="#1E88E5" stroke-width="2" marker-end="url(#az)"/>
+  <text x="448" y="363" font-size="9" fill="#E53935">x₀</text>
+  <text x="404" y="316" font-size="9" fill="#1E88E5">z₀</text>
+  <text x="380" y="355" font-size="10" fill="#FF9800" font-weight="bold">Frame 0</text>
+
+  <!-- Link 1: d1=340mm vertical -->
+  <line x1="400" y1="360" x2="408" y2="220" stroke="#78909C" stroke-width="8" stroke-linecap="round"/>
+  <text x="420" y="290" font-size="11" fill="#546E7A" font-style="italic">d₁ = 340</text>
+
+  <!-- Joint 1 (Frame 1) -->
+  <circle cx="408" cy="220" r="10" fill="#FFC107" stroke="#F57F17" stroke-width="2"/>
+  <text x="408" y="224" text-anchor="middle" font-size="9" fill="#333" font-weight="bold">θ₁</text>
+
+  <!-- Frame 1 axes -->
+  <line x1="408" y1="220" x2="448" y2="220" stroke="#E53935" stroke-width="2" marker-end="url(#ax)"/>
+  <line x1="408" y1="220" x2="408" y2="180" stroke="#1E88E5" stroke-width="2" marker-end="url(#az)"/>
+  <text x="456" y="223" font-size="9" fill="#E53935">x₁</text>
+  <text x="412" y="176" font-size="9" fill="#1E88E5">z₁</text>
+  <text x="365" y="210" font-size="10" fill="#FF9800" font-weight="bold">Frame 1</text>
+  <text x="418" y="235" font-size="9" fill="#757575">a₁=16</text>
+
+  <!-- Link 2: a2=220mm -->
+  <line x1="408" y1="220" x2="540" y2="160" stroke="#78909C" stroke-width="8" stroke-linecap="round"/>
+  <text x="470" y="175" font-size="11" fill="#546E7A" font-style="italic">a₂ = 220</text>
+
+  <!-- Joint 2 (Frame 2) -->
+  <circle cx="540" cy="160" r="10" fill="#FFC107" stroke="#F57F17" stroke-width="2"/>
+  <text x="540" y="164" text-anchor="middle" font-size="9" fill="#333" font-weight="bold">θ₂</text>
+  <text x="555" y="155" font-size="10" fill="#FF9800" font-weight="bold">Frame 2</text>
+
+  <!-- Link 3: a3=220mm -->
+  <line x1="540" y1="160" x2="660" y2="220" stroke="#78909C" stroke-width="8" stroke-linecap="round"/>
+  <text x="605" y="180" font-size="11" fill="#546E7A" font-style="italic">a₃ = 220</text>
+
+  <!-- Joint 3 (Frame 3) -->
+  <circle cx="660" cy="220" r="10" fill="#FFC107" stroke="#F57F17" stroke-width="2"/>
+  <text x="660" y="224" text-anchor="middle" font-size="9" fill="#333" font-weight="bold">θ₃</text>
+  <text x="675" y="215" font-size="10" fill="#FF9800" font-weight="bold">Frame 3</text>
+
+  <!-- Link 4: wrist -->
+  <line x1="660" y1="220" x2="700" y2="250" stroke="#78909C" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Joint 4 (Frame 4) -->
+  <circle cx="700" cy="250" r="8" fill="#FFC107" stroke="#F57F17" stroke-width="2"/>
+  <text x="700" y="253" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">θ₄</text>
+  <text x="715" y="248" font-size="9" fill="#FF9800" font-weight="bold">Frame 4</text>
+
+  <!-- Link 5: d5=151mm to gripper -->
+  <line x1="700" y1="250" x2="700" y2="310" stroke="#78909C" stroke-width="4" stroke-linecap="round"/>
+  <text x="715" y="280" font-size="10" fill="#546E7A" font-style="italic">d₅ = 151</text>
+
+  <!-- Joint 5 / End Effector (Frame 5) -->
+  <circle cx="700" cy="310" r="8" fill="#FFC107" stroke="#F57F17" stroke-width="2"/>
+  <text x="700" y="313" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">θ₅</text>
+
+  <!-- Gripper -->
+  <line x1="693" y1="318" x2="688" y2="345" stroke="#F44336" stroke-width="3" stroke-linecap="round"/>
+  <line x1="707" y1="318" x2="712" y2="345" stroke="#F44336" stroke-width="3" stroke-linecap="round"/>
+  <text x="700" y="360" text-anchor="middle" font-size="10" fill="#F44336" font-weight="bold">Gripper</text>
+  <text x="700" y="375" text-anchor="middle" font-size="9" fill="#F44336">Frame 5 (EE)</text>
+
+  <!-- DH Table -->
+  <g transform="translate(60,80)">
+    <rect x="0" y="0" width="280" height="170" rx="5" fill="white" stroke="#ccc" stroke-width="1"/>
+    <text x="140" y="20" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">DH Parameters</text>
+    <line x1="0" y1="28" x2="280" y2="28" stroke="#ccc"/>
+
+    <!-- Header -->
+    <text x="25" y="45" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">Joint</text>
+    <text x="80" y="45" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">α (rad)</text>
+    <text x="135" y="45" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">d (mm)</text>
+    <text x="190" y="45" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">a (mm)</text>
+    <text x="245" y="45" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">θ</text>
+    <line x1="0" y1="52" x2="280" y2="52" stroke="#eee"/>
+
+    <!-- Data rows -->
+    <text x="25" y="70" text-anchor="middle" font-size="10" fill="#333">1</text>
+    <text x="80" y="70" text-anchor="middle" font-size="10" fill="#333">-π/2</text>
+    <text x="135" y="70" text-anchor="middle" font-size="10" fill="#333">340</text>
+    <text x="190" y="70" text-anchor="middle" font-size="10" fill="#333">16</text>
+    <text x="245" y="70" text-anchor="middle" font-size="10" fill="#FFC107">θ₁</text>
+
+    <text x="25" y="90" text-anchor="middle" font-size="10" fill="#333">2</text>
+    <text x="80" y="90" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="135" y="90" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="190" y="90" text-anchor="middle" font-size="10" fill="#333">220</text>
+    <text x="245" y="90" text-anchor="middle" font-size="10" fill="#FFC107">θ₂</text>
+
+    <text x="25" y="110" text-anchor="middle" font-size="10" fill="#333">3</text>
+    <text x="80" y="110" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="135" y="110" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="190" y="110" text-anchor="middle" font-size="10" fill="#333">220</text>
+    <text x="245" y="110" text-anchor="middle" font-size="10" fill="#FFC107">θ₃</text>
+
+    <text x="25" y="130" text-anchor="middle" font-size="10" fill="#333">4</text>
+    <text x="80" y="130" text-anchor="middle" font-size="10" fill="#333">-π/2</text>
+    <text x="135" y="130" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="190" y="130" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="245" y="130" text-anchor="middle" font-size="10" fill="#FFC107">θ₄</text>
+
+    <text x="25" y="150" text-anchor="middle" font-size="10" fill="#333">5</text>
+    <text x="80" y="150" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="135" y="150" text-anchor="middle" font-size="10" fill="#333">151</text>
+    <text x="190" y="150" text-anchor="middle" font-size="10" fill="#333">0</text>
+    <text x="245" y="150" text-anchor="middle" font-size="10" fill="#FFC107">θ₅</text>
+  </g>
+
+  <!-- Units note -->
+  <text x="400" y="480" text-anchor="middle" font-size="10" fill="#999">All dimensions in millimeters. Joint angles θ₁–θ₅ are the variable parameters.</text>
+</svg>

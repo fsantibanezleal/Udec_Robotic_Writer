@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 550" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555"/>
+    </marker>
+    <marker id="arrWhite" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="white"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">System Architecture</text>
+
+  <!-- Frontend Layer -->
+  <rect x="30" y="50" width="740" height="100" rx="10" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+  <text x="60" y="72" font-size="13" font-weight="bold" fill="#1565C0">Frontend (Dash + Plotly)</text>
+
+  <rect x="50" y="85" width="140" height="50" rx="5" fill="#2196F3" stroke="#1565C0" stroke-width="1"/>
+  <text x="120" y="107" text-anchor="middle" font-size="10" fill="white">3D Simulation</text>
+  <text x="120" y="122" text-anchor="middle" font-size="9" fill="#BBDEFB">Plotly Scatter3d</text>
+
+  <rect x="210" y="85" width="140" height="50" rx="5" fill="#2196F3" stroke="#1565C0" stroke-width="1"/>
+  <text x="280" y="107" text-anchor="middle" font-size="10" fill="white">Kinematics Explorer</text>
+  <text x="280" y="122" text-anchor="middle" font-size="9" fill="#BBDEFB">Joint Sliders</text>
+
+  <rect x="370" y="85" width="140" height="50" rx="5" fill="#2196F3" stroke="#1565C0" stroke-width="1"/>
+  <text x="440" y="107" text-anchor="middle" font-size="10" fill="white">Animation Controls</text>
+  <text x="440" y="122" text-anchor="middle" font-size="9" fill="#BBDEFB">Play/Pause/Seek</text>
+
+  <rect x="530" y="85" width="140" height="50" rx="5" fill="#2196F3" stroke="#1565C0" stroke-width="1"/>
+  <text x="600" y="107" text-anchor="middle" font-size="10" fill="white">Configuration</text>
+  <text x="600" y="122" text-anchor="middle" font-size="9" fill="#BBDEFB">Parameters Panel</text>
+
+  <!-- Arrow: Frontend → API -->
+  <line x1="400" y1="150" x2="400" y2="180" stroke="#555" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="410" y="170" font-size="9" fill="#555">REST / Callbacks</text>
+
+  <!-- API Layer -->
+  <rect x="30" y="180" width="740" height="90" rx="10" fill="#FFF3E0" stroke="#E65100" stroke-width="2"/>
+  <text x="60" y="202" font-size="13" font-weight="bold" fill="#E65100">Backend API (FastAPI)</text>
+
+  <rect x="50" y="215" width="155" height="40" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="1"/>
+  <text x="127" y="240" text-anchor="middle" font-size="10" fill="white">/api/writer/simulate</text>
+
+  <rect x="220" y="215" width="155" height="40" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="1"/>
+  <text x="297" y="240" text-anchor="middle" font-size="10" fill="white">/api/kinematics/*</text>
+
+  <rect x="390" y="215" width="155" height="40" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="1"/>
+  <text x="467" y="240" text-anchor="middle" font-size="10" fill="white">/api/robot/state</text>
+
+  <rect x="560" y="215" width="155" height="40" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="1"/>
+  <text x="637" y="240" text-anchor="middle" font-size="10" fill="white">/api/hardware/*</text>
+
+  <!-- Arrow: API → Core -->
+  <line x1="400" y1="270" x2="400" y2="300" stroke="#555" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Core Engine Layer -->
+  <rect x="30" y="300" width="480" height="100" rx="10" fill="#E8F5E9" stroke="#2E7D32" stroke-width="2"/>
+  <text x="60" y="322" font-size="13" font-weight="bold" fill="#2E7D32">Core Engine (Python)</text>
+
+  <rect x="50" y="335" width="130" height="50" rx="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1"/>
+  <text x="115" y="355" text-anchor="middle" font-size="10" fill="white">Kinematics</text>
+  <text x="115" y="370" text-anchor="middle" font-size="9" fill="#C8E6C9">FK / IK / DH</text>
+
+  <rect x="195" y="335" width="130" height="50" rx="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1"/>
+  <text x="260" y="355" text-anchor="middle" font-size="10" fill="white">Robot Model</text>
+  <text x="260" y="370" text-anchor="middle" font-size="9" fill="#C8E6C9">ScorbotIII</text>
+
+  <rect x="340" y="335" width="155" height="50" rx="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1"/>
+  <text x="417" y="355" text-anchor="middle" font-size="10" fill="white">Writer Logic</text>
+  <text x="417" y="370" text-anchor="middle" font-size="9" fill="#C8E6C9">Pick &amp; Place</text>
+
+  <!-- Hardware Abstraction Layer -->
+  <rect x="530" y="300" width="240" height="100" rx="10" fill="#FCE4EC" stroke="#C62828" stroke-width="2"/>
+  <text x="560" y="322" font-size="13" font-weight="bold" fill="#C62828">Hardware Layer</text>
+
+  <rect x="545" y="335" width="68" height="50" rx="5" fill="#F44336" stroke="#C62828" stroke-width="1"/>
+  <text x="579" y="355" text-anchor="middle" font-size="9" fill="white">MATLAB</text>
+  <text x="579" y="370" text-anchor="middle" font-size="8" fill="#FFCDD2">Engine</text>
+
+  <rect x="620" y="335" width="68" height="50" rx="5" fill="#F44336" stroke="#C62828" stroke-width="1"/>
+  <text x="654" y="355" text-anchor="middle" font-size="9" fill="white">Arduino</text>
+  <text x="654" y="370" text-anchor="middle" font-size="8" fill="#FFCDD2">Serial</text>
+
+  <rect x="695" y="335" width="68" height="50" rx="5" fill="#F44336" stroke="#C62828" stroke-width="1"/>
+  <text x="729" y="355" text-anchor="middle" font-size="9" fill="white">Serial</text>
+  <text x="729" y="370" text-anchor="middle" font-size="8" fill="#FFCDD2">Direct</text>
+
+  <!-- Arrow: Core → Hardware -->
+  <line x1="510" y1="360" x2="530" y2="360" stroke="#555" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Hardware targets at bottom -->
+  <rect x="30" y="430" width="740" height="90" rx="10" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="2"/>
+  <text x="60" y="452" font-size="13" font-weight="bold" fill="#6A1B9A">Physical Hardware (External)</text>
+
+  <rect x="80" y="465" width="150" height="40" rx="5" fill="#9C27B0" stroke="#6A1B9A" stroke-width="1"/>
+  <text x="155" y="485" text-anchor="middle" font-size="10" fill="white">Scorbot III</text>
+  <text x="155" y="498" text-anchor="middle" font-size="9" fill="#E1BEE7">RS-232 / Winwedge</text>
+
+  <rect x="260" y="465" width="150" height="40" rx="5" fill="#9C27B0" stroke="#6A1B9A" stroke-width="1"/>
+  <text x="335" y="485" text-anchor="middle" font-size="10" fill="white">Arduino + Steppers</text>
+  <text x="335" y="498" text-anchor="middle" font-size="9" fill="#E1BEE7">USB Serial</text>
+
+  <rect x="440" y="465" width="150" height="40" rx="5" fill="#9C27B0" stroke="#6A1B9A" stroke-width="1"/>
+  <text x="515" y="485" text-anchor="middle" font-size="10" fill="white">MATLAB + Toolbox</text>
+  <text x="515" y="498" text-anchor="middle" font-size="9" fill="#E1BEE7">Engine API</text>
+
+  <rect x="620" y="465" width="130" height="40" rx="5" fill="#9C27B0" stroke="#6A1B9A" stroke-width="1"/>
+  <text x="685" y="485" text-anchor="middle" font-size="10" fill="white">Custom HW</text>
+  <text x="685" y="498" text-anchor="middle" font-size="9" fill="#E1BEE7">Via Adapter</text>
+
+  <!-- Arrows: HAL → Hardware -->
+  <line x1="579" y1="400" x2="155" y2="460" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="654" y1="400" x2="335" y2="460" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="654" y1="400" x2="515" y2="460" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="729" y1="400" x2="685" y2="460" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+</svg>
