@@ -208,13 +208,13 @@ sidebar = dbc.Card([
                     dbc.Input(id="input-text", type="text", value="HELLO",
                               placeholder="Enter text...", maxLength=20, className="mb-2"),
                     html.Label("Block Circle Radius (mm):", className="text-light small"),
-                    dcc.Slider(id="slider-radius", min=200, max=500, value=350, step=10,
+                    dcc.Slider(id="slider-radius", min=200, max=400, value=280, step=10,
                                marks=None, tooltip={"placement": "bottom", "always_visible": True}),
                     html.Label("Angular Separation (deg):", className="text-light small"),
                     dcc.Slider(id="slider-angle-sep", min=3, max=20, value=8, step=0.5,
                                marks=None, tooltip={"placement": "bottom", "always_visible": True}),
                     html.Label("Block Spacing (mm):", className="text-light small"),
-                    dcc.Slider(id="slider-spacing", min=15, max=60, value=30, step=1,
+                    dcc.Slider(id="slider-spacing", min=15, max=40, value=25, step=1,
                                marks=None, tooltip={"placement": "bottom", "always_visible": True}),
                     dbc.Button("Run Simulation", id="btn-simulate", color="primary",
                                className="w-100 mt-3", n_clicks=0),
@@ -315,7 +315,7 @@ def run_simulation(n_clicks, text, radius, angle_sep, spacing):
         min_angular_separation_deg=angle_sep,
     )
     writing_line = WritingLine(
-        start_xyz=np.array([300.0, -200.0, 50.0]),
+        start_xyz=np.array([200.0, -120.0, 50.0]),
         spacing_mm=spacing,
     )
     robot = ScorbotIII(interpolation_steps=30)

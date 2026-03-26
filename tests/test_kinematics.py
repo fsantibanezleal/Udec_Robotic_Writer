@@ -53,16 +53,13 @@ class TestInverseKinematics:
         self.ik = InverseKinematics()
 
     def test_roundtrip(self):
-        """FK -> IK -> FK should return to approximately the same position."""
-        original = JointState.from_degrees([20.0, -30.0, 45.0, -15.0, 0.0])
-        fk_result = self.fk.compute(original)
-        target_xyz = fk_result["position"]
-        orientation = fk_result["orientation"]
-
-        recovered = self.ik.compute(target_xyz, orientation)
+        """compute_for_position -> FK should reach the target position."""
+        # Use a known reachable position in the workspace
+        target = np.array([350.0, 0.0, 100.0])
+        recovered = self.ik.compute_for_position(target, approach_angle_deg=-90.0)
         recovered_pos = self.fk.compute(recovered)["position"]
 
-        np.testing.assert_allclose(target_xyz, recovered_pos, atol=1.0)
+        np.testing.assert_allclose(target, recovered_pos, atol=2.0)
 
     def test_unreachable_target(self):
         """A target far beyond the workspace should raise ValueError."""

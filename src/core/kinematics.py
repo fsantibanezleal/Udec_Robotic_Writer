@@ -290,6 +290,10 @@ class InverseKinematics:
     ) -> JointState:
         """Simplified IK: reach a position with the gripper approaching from a given pitch.
 
+        The approach angle is measured from the horizontal plane:
+            -90 = gripper pointing straight down (most common for pick-and-place)
+              0 = gripper pointing horizontally forward
+
         Args:
             target_xyz: Desired [x, y, z] in mm.
             approach_angle_deg: Pitch angle of approach (default -90 = straight down).
@@ -298,16 +302,18 @@ class InverseKinematics:
             JointState with computed angles.
         """
         pitch = math.radians(approach_angle_deg)
-        # Build orientation: gripper z-axis aligned with approach direction
-        cp, sp = math.cos(pitch), math.sin(pitch)
-        # Compute base angle from target position
         base_angle = math.atan2(target_xyz[1], target_xyz[0])
         cb, sb = math.cos(base_angle), math.sin(base_angle)
+        cp, sp = math.cos(pitch), math.sin(pitch)
 
+        # Approach vector (z-axis of end-effector frame):
+        #   For pitch=-90°: [0, 0, -1] (pointing down)
+        #   For pitch=0°:   [cb, sb, 0] (pointing forward)
+        # Rotation about base Y by pitch, then about world Z by base_angle
         orientation = np.array([
-            [cb * cp,  -sb, cb * sp],
-            [sb * cp,   cb, sb * sp],
-            [-sp,      0.0,     cp],
+            [ cb * cp, -sb, -cb * sp],
+            [ sb * cp,  cb, -sb * sp],
+            [ sp,       0.0,     cp],
         ])
 
         return self.compute(target_xyz, orientation)

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 950" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <text x="350" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">Robotic Writer — Solution Flow</text>
+
+  <!-- START -->
+  <ellipse cx="350" cy="70" rx="80" ry="25" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+  <text x="350" y="75" text-anchor="middle" font-size="13" fill="white" font-weight="bold">START</text>
+  <line x1="350" y1="95" x2="350" y2="120" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Input -->
+  <polygon points="250,120 450,120 470,150 230,150" fill="#2196F3" stroke="#1565C0" stroke-width="2"/>
+  <text x="350" y="140" text-anchor="middle" font-size="12" fill="white">Input: text string</text>
+  <line x1="350" y1="150" x2="350" y2="180" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Initialize -->
+  <rect x="230" y="180" width="240" height="40" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="2"/>
+  <text x="350" y="205" text-anchor="middle" font-size="12" fill="white">Initialize robot, go HOME</text>
+  <line x1="350" y1="220" x2="350" y2="250" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Parse text -->
+  <rect x="230" y="250" width="240" height="40" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="2"/>
+  <text x="350" y="275" text-anchor="middle" font-size="12" fill="white">Parse text → character list</text>
+  <line x1="350" y1="290" x2="350" y2="320" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Loop start (diamond) -->
+  <polygon points="350,320 480,365 350,410 220,365" fill="#9C27B0" stroke="#6A1B9A" stroke-width="2"/>
+  <text x="350" y="362" text-anchor="middle" font-size="11" fill="white">More chars?</text>
+  <text x="350" y="377" text-anchor="middle" font-size="11" fill="white">(i &lt; len)</text>
+
+  <!-- No branch -->
+  <line x1="480" y1="365" x2="580" y2="365" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="520" y="358" font-size="11" fill="#E91E63" font-weight="bold">No</text>
+  <line x1="580" y1="365" x2="580" y2="890" stroke="#555" stroke-width="2"/>
+  <line x1="580" y1="890" x2="350" y2="890" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Yes branch -->
+  <line x1="350" y1="410" x2="350" y2="440" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="430" font-size="11" fill="#4CAF50" font-weight="bold">Yes</text>
+
+  <!-- Is space? -->
+  <polygon points="350,440 450,470 350,500 250,470" fill="#607D8B" stroke="#37474F" stroke-width="2"/>
+  <text x="350" y="474" text-anchor="middle" font-size="11" fill="white">Space?</text>
+
+  <!-- Space yes -->
+  <line x1="450" y1="470" x2="530" y2="470" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="480" y="463" font-size="10" fill="#4CAF50">Yes</text>
+  <rect x="530" y="455" width="110" height="30" rx="5" fill="#B0BEC5" stroke="#78909C" stroke-width="1"/>
+  <text x="585" y="475" text-anchor="middle" font-size="10" fill="#333">Skip slot (gap)</text>
+  <line x1="585" y1="485" x2="585" y2="835" stroke="#555" stroke-width="1.5"/>
+  <line x1="585" y1="835" x2="350" y2="835" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Space no -->
+  <line x1="350" y1="500" x2="350" y2="525" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="516" font-size="10" fill="#E91E63">No</text>
+
+  <!-- Find block -->
+  <rect x="230" y="525" width="240" height="35" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="2"/>
+  <text x="350" y="547" text-anchor="middle" font-size="11" fill="white">Find block on circle (char→angle)</text>
+  <line x1="350" y1="560" x2="350" y2="585" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Open gripper -->
+  <rect x="250" y="585" width="200" height="30" rx="5" fill="#03A9F4" stroke="#0277BD" stroke-width="1.5"/>
+  <text x="350" y="605" text-anchor="middle" font-size="10" fill="white">Open gripper</text>
+  <line x1="350" y1="615" x2="350" y2="635" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Move to block (IK) -->
+  <rect x="230" y="635" width="240" height="35" rx="5" fill="#03A9F4" stroke="#0277BD" stroke-width="1.5"/>
+  <text x="350" y="657" text-anchor="middle" font-size="10" fill="white">IK → Move above block → Lower</text>
+  <line x1="350" y1="670" x2="350" y2="690" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Close gripper (pick) -->
+  <rect x="250" y="690" width="200" height="30" rx="5" fill="#F44336" stroke="#C62828" stroke-width="1.5"/>
+  <text x="350" y="710" text-anchor="middle" font-size="10" fill="white">Close gripper (PICK)</text>
+  <line x1="350" y1="720" x2="350" y2="740" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Lift and move to slot -->
+  <rect x="220" y="740" width="260" height="35" rx="5" fill="#03A9F4" stroke="#0277BD" stroke-width="1.5"/>
+  <text x="350" y="762" text-anchor="middle" font-size="10" fill="white">Lift → IK → Move above slot → Lower</text>
+  <line x1="350" y1="775" x2="350" y2="795" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Open gripper (place) -->
+  <rect x="250" y="795" width="200" height="30" rx="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1.5"/>
+  <text x="350" y="815" text-anchor="middle" font-size="10" fill="white">Open gripper (PLACE)</text>
+  <line x1="350" y1="825" x2="350" y2="840" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Increment -->
+  <rect x="270" y="840" width="160" height="30" rx="5" fill="#B0BEC5" stroke="#78909C" stroke-width="1"/>
+  <text x="350" y="860" text-anchor="middle" font-size="10" fill="#333">i ← i + 1</text>
+  <!-- Loop back -->
+  <line x1="270" y1="855" x2="140" y2="855" stroke="#555" stroke-width="1.5"/>
+  <line x1="140" y1="855" x2="140" y2="365" stroke="#555" stroke-width="1.5"/>
+  <line x1="140" y1="365" x2="220" y2="365" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Go home -->
+  <rect x="260" y="890" width="180" height="35" rx="5" fill="#FF9800" stroke="#E65100" stroke-width="2"/>
+  <text x="350" y="912" text-anchor="middle" font-size="12" fill="white">Return to HOME</text>
+  <line x1="350" y1="925" x2="350" y2="945" stroke="#555" stroke-width="2"/>
+
+  <!-- END -->
+  <ellipse cx="350" cy="945" rx="60" ry="20" fill="#F44336" stroke="#B71C1C" stroke-width="2"/>
+  <text x="350" y="950" text-anchor="middle" font-size="12" fill="white" font-weight="bold">END</text>
+</svg>

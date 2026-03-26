@@ -79,7 +79,7 @@ class BlockCircle:
         charset: String of characters, one per block.
     """
 
-    radius_mm: float = 350.0
+    radius_mm: float = 280.0
     block_height_mm: float = 50.0
     block_size_mm: float = 25.0
     min_angular_separation_deg: float = 8.0
@@ -147,9 +147,9 @@ class WritingLine:
         spacing_mm: Distance between block centers.
     """
 
-    start_xyz: np.ndarray = field(default_factory=lambda: np.array([300.0, -200.0, 50.0]))
+    start_xyz: np.ndarray = field(default_factory=lambda: np.array([200.0, -120.0, 50.0]))
     direction: np.ndarray = field(default_factory=lambda: np.array([1.0, 0.0, 0.0]))
-    spacing_mm: float = 30.0
+    spacing_mm: float = 25.0
 
     def slot_position(self, index: int) -> np.ndarray:
         """Get the 3D position for the i-th block slot."""
@@ -163,8 +163,8 @@ class RoboticWriter:
     BlockCircle and place them on the WritingLine to spell a word.
     """
 
-    SAFE_HEIGHT_MM = 150.0  # Height to lift to between pick and place
-    APPROACH_ANGLE_DEG = -90.0  # Straight-down approach
+    SAFE_HEIGHT_MM = 100.0  # Height to lift to between pick and place
+    APPROACH_ANGLE_DEG = -70.0  # Near-vertical approach (tilted for reachability)
     GRIPPER_OPEN_MM = 40.0
     PICK_DURATION = 1.5
     MOVE_DURATION = 2.0
