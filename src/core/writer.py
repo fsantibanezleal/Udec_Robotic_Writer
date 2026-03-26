@@ -191,6 +191,7 @@ class RoboticWriter:
         self.writing_line = writing_line or WritingLine()
         self._placed_count = 0
         self._action_log: list[dict] = []
+        self._used_characters: set[str] = set()
 
     def write_text(self, text: str) -> list[dict]:
         """Execute the full writing sequence for a text string.
@@ -255,7 +256,7 @@ class RoboticWriter:
 
         # 4. Close gripper (pick)
         self.robot.close_gripper()
-        block.is_available = False
+        self._used_characters.add(char.upper())
         self._log_action("pick", f"Picked block '{char}'")
 
         # 5. Lift to safe height
@@ -296,7 +297,10 @@ class RoboticWriter:
             "block_circle": {
                 "positions": self.block_circle.get_arc_points().tolist(),
                 "characters": [b.character for b in self.block_circle.blocks],
-                "available": [b.is_available for b in self.block_circle.blocks],
+                "available": [
+                    b.character not in self._used_characters
+                    for b in self.block_circle.blocks
+                ],
                 "angles_deg": self.block_circle.get_arc_angles_deg(),
                 "radius_mm": self.block_circle.radius_mm,
             },
@@ -315,3 +319,4 @@ class RoboticWriter:
         self.robot.reset_trajectory_log()
         self._placed_count = 0
         self._action_log = []
+        self._used_characters = set()
