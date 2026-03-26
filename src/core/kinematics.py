@@ -244,9 +244,9 @@ class InverseKinematics:
         if abs(cos5) < 1e-10:
             theta234 = 0.0
         else:
-            num = -uz / cos5
-            den = (ux * math.cos(theta1) + uy * math.sin(theta1)) / cos5
-            theta234 = math.atan2(num, den)
+            ux_eff = (ux * math.cos(theta1) + uy * math.sin(theta1)) / cos5
+            uz_eff = -uz / cos5
+            theta234 = math.atan2(-ux_eff, uz_eff)
 
         # Intermediate k1, k2 for the planar 2-link problem
         k1 = (qx * math.cos(theta1) + qy * math.sin(theta1)

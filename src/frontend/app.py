@@ -28,6 +28,7 @@ from ..core.kinematics import (
 )
 from ..core.robot import ScorbotIII
 from ..core.writer import RoboticWriter, BlockCircle, WritingLine
+from ..core.modes import WritingSession, generate_ouija_response
 
 
 # ── Dash app ───────────────────────────────────────────────────────────────
@@ -107,9 +108,9 @@ def create_block_circle_traces(block_circle: BlockCircle) -> list:
     return [blocks_trace, arc_trace]
 
 
-def create_writing_line_traces(writing_line: WritingLine, num_slots: int = 10) -> list:
-    """Generate traces for the writing line slots."""
-    positions = np.array([writing_line.slot_position(i) for i in range(num_slots)])
+def create_writing_line_traces(writing_line: WritingLine, num_slots: int = 15) -> list:
+    """Generate traces for the writing arc slots."""
+    positions = writing_line.get_slot_positions(num_slots)
 
     slots_trace = go.Scatter3d(
         x=positions[:, 0], y=positions[:, 1], z=positions[:, 2],
@@ -119,20 +120,16 @@ def create_writing_line_traces(writing_line: WritingLine, num_slots: int = 10) -
         hovertemplate="Slot %{pointNumber}<br>X: %{x:.1f}<br>Y: %{y:.1f}<extra></extra>",
     )
 
-    # Writing line
-    line_start = writing_line.start_xyz
-    line_end = writing_line.slot_position(num_slots - 1)
-    line_trace = go.Scatter3d(
-        x=[line_start[0], line_end[0]],
-        y=[line_start[1], line_end[1]],
-        z=[line_start[2], line_end[2]],
+    # Writing arc line (smooth curve connecting slots)
+    arc_trace = go.Scatter3d(
+        x=positions[:, 0], y=positions[:, 1], z=positions[:, 2],
         mode="lines",
         line=dict(color="rgba(255,255,100,0.3)", width=3),
-        name="Writing Line",
+        name="Writing Arc",
         showlegend=False,
     )
 
-    return [slots_trace, line_trace]
+    return [slots_trace, arc_trace]
 
 
 def create_trajectory_trace(trajectory_positions: list) -> go.Scatter3d:
@@ -200,37 +197,62 @@ sidebar = dbc.Card([
     dbc.CardHeader(html.H5("Control Panel", className="mb-0")),
     dbc.CardBody([
         # Tab selector
-        dbc.Tabs(id="control-tabs", active_tab="tab-writer", children=[
-            # Writer Tab
-            dbc.Tab(label="Writer", tab_id="tab-writer", children=[
+        dbc.Tabs(id="control-tabs", active_tab="tab-tutorial", children=[
+            # Tutorial Tab
+            dbc.Tab(label="Tutorial", tab_id="tab-tutorial", children=[
                 html.Div([
-                    html.Label("Text to Write:", className="text-light mt-3"),
+                    html.P("Type a phrase and the robot will write it letter by letter.",
+                           className="text-muted small mt-2"),
+                    html.Label("Your phrase:", className="text-light"),
                     dbc.Input(id="input-text", type="text", value="HELLO",
-                              placeholder="Enter text...", maxLength=20, className="mb-2"),
+                              placeholder="Type something...", maxLength=15, className="mb-2"),
                     html.Label("Block Circle Radius (mm):", className="text-light small"),
                     dcc.Slider(id="slider-radius", min=200, max=400, value=280, step=10,
                                marks=None, tooltip={"placement": "bottom", "always_visible": True}),
                     html.Label("Angular Separation (deg):", className="text-light small"),
                     dcc.Slider(id="slider-angle-sep", min=3, max=20, value=8, step=0.5,
                                marks=None, tooltip={"placement": "bottom", "always_visible": True}),
-                    html.Label("Block Spacing (mm):", className="text-light small"),
-                    dcc.Slider(id="slider-spacing", min=15, max=40, value=25, step=1,
+                    html.Label("Slot Spacing (deg):", className="text-light small"),
+                    dcc.Slider(id="slider-spacing", min=2, max=8, value=4, step=0.5,
                                marks=None, tooltip={"placement": "bottom", "always_visible": True}),
-                    dbc.Button("Run Simulation", id="btn-simulate", color="primary",
+                    dbc.Button("Write It!", id="btn-simulate", color="primary",
                                className="w-100 mt-3", n_clicks=0),
                     dbc.Button("Reset", id="btn-reset", color="secondary",
                                className="w-100 mt-2", n_clicks=0),
+                ], className="p-2"),
+            ]),
+            # Ouija Tab
+            dbc.Tab(label="Ouija", tab_id="tab-ouija", children=[
+                html.Div([
+                    html.Div([
+                        html.Span("OUIJA", style={"fontSize": "1.5rem", "fontWeight": "bold",
+                                                    "letterSpacing": "0.5em", "color": "#9C27B0"}),
+                    ], className="text-center mt-2 mb-2"),
+                    html.P("Ask a question... the spirits will respond through the robot.",
+                           className="text-muted small fst-italic"),
+                    html.Label("Your question:", className="text-light"),
+                    dbc.Input(id="input-ouija", type="text", value="",
+                              placeholder="Ask the spirits...", maxLength=100, className="mb-2"),
+                    html.Div(id="ouija-response-preview", className="mt-2 mb-2"),
+                    dbc.Button("Consult the Spirits", id="btn-ouija", color="dark",
+                               className="w-100 mt-2", n_clicks=0,
+                               style={"backgroundColor": "#4A148C", "borderColor": "#7B1FA2"}),
+                    dbc.Button("Ask Again", id="btn-ouija-reroll", color="secondary",
+                               outline=True, className="w-100 mt-2", n_clicks=0, size="sm"),
+                    html.Hr(),
+                    html.Div(id="ouija-history",
+                             style={"maxHeight": "200px", "overflowY": "auto", "fontSize": "0.8rem"}),
                 ], className="p-2"),
             ]),
             # Kinematics Tab
             dbc.Tab(label="Kinematics", tab_id="tab-kinematics", children=[
                 html.Div([
                     html.H6("Joint Angles (degrees)", className="text-light mt-3"),
-                    make_slider("slider-j1", "Base (θ₁)", -126.5, 126.5, 0, 0.5),
-                    make_slider("slider-j2", "Shoulder (θ₂)", -120, 63, 0, 0.5),
-                    make_slider("slider-j3", "Elbow (θ₃)", -90, 90, 0, 0.5),
-                    make_slider("slider-j4", "Pitch (θ₄)", -250, 40, 0, 0.5),
-                    make_slider("slider-j5", "Roll (θ₅)", -180, 180, 0, 0.5),
+                    make_slider("slider-j1", "Base", -126.5, 126.5, 0, 0.5),
+                    make_slider("slider-j2", "Shoulder", -120, 63, 0, 0.5),
+                    make_slider("slider-j3", "Elbow", -90, 90, 0, 0.5),
+                    make_slider("slider-j4", "Pitch", -250, 40, 0, 0.5),
+                    make_slider("slider-j5", "Roll", -180, 180, 0, 0.5),
                     html.Hr(),
                     html.Div(id="fk-result", className="text-info small"),
                 ], className="p-2"),
@@ -289,42 +311,30 @@ app.layout = dbc.Container([
     # Hidden stores for simulation data
     dcc.Store(id="store-sim-data", data=None),
     dcc.Store(id="store-playing", data=False),
+    dcc.Store(id="store-ouija-response", data=""),
+    dcc.Store(id="store-ouija-history", data=[]),
 ], fluid=True, style={"backgroundColor": "rgba(20,20,20,1)", "minHeight": "100vh"})
 
 
 # ── Callbacks ──────────────────────────────────────────────────────────────
 
-@callback(
-    Output("store-sim-data", "data"),
-    Output("action-log", "children"),
-    Input("btn-simulate", "n_clicks"),
-    State("input-text", "value"),
-    State("slider-radius", "value"),
-    State("slider-angle-sep", "value"),
-    State("slider-spacing", "value"),
-    prevent_initial_call=True,
-)
-def run_simulation(n_clicks, text, radius, angle_sep, spacing):
-    """Execute the writer simulation and store results."""
-    if not text:
-        return no_update, no_update
-
+def _run_writer(text: str, radius: float, angle_sep: float, spacing: float):
+    """Execute writer simulation and return (sim_data, log_items)."""
     block_circle = BlockCircle(
         radius_mm=radius,
         block_height_mm=50.0,
         min_angular_separation_deg=angle_sep,
     )
     writing_line = WritingLine(
-        start_xyz=np.array([200.0, -120.0, 50.0]),
-        spacing_mm=spacing,
+        radius_mm=radius + 20,
+        angular_spacing_deg=spacing,
     )
     robot = ScorbotIII(interpolation_steps=30)
     writer = RoboticWriter(robot=robot, block_circle=block_circle, writing_line=writing_line)
 
-    action_log = writer.write_text(text.upper())
+    action_log = writer.write_text(text)
     sim_data = writer.get_simulation_data()
 
-    # Build action log display
     log_items = []
     for i, action in enumerate(action_log):
         color = {
@@ -338,6 +348,81 @@ def run_simulation(n_clicks, text, radius, angle_sep, spacing):
         ))
 
     return sim_data, log_items
+
+
+@callback(
+    Output("store-sim-data", "data"),
+    Output("action-log", "children"),
+    Input("btn-simulate", "n_clicks"),
+    State("input-text", "value"),
+    State("slider-radius", "value"),
+    State("slider-angle-sep", "value"),
+    State("slider-spacing", "value"),
+    prevent_initial_call=True,
+)
+def run_tutorial_simulation(n_clicks, text, radius, angle_sep, spacing):
+    """Tutorial mode: write the user's text."""
+    if not text:
+        return no_update, no_update
+    return _run_writer(text.upper(), radius, angle_sep, spacing)
+
+
+@callback(
+    Output("store-ouija-response", "data"),
+    Output("ouija-response-preview", "children"),
+    Input("input-ouija", "value"),
+    Input("btn-ouija-reroll", "n_clicks"),
+    prevent_initial_call=True,
+)
+def preview_ouija_response(question, reroll_clicks):
+    """Generate and preview a Ouija response."""
+    if not question:
+        return "", html.Div()
+    response = generate_ouija_response(question)
+    return response, dbc.Alert(
+        [html.Strong("The spirits say: "), response],
+        color="dark",
+        className="mb-0 py-2",
+        style={"backgroundColor": "rgba(74,20,140,0.3)", "borderColor": "#7B1FA2",
+               "color": "#CE93D8"},
+    )
+
+
+@callback(
+    Output("store-sim-data", "data", allow_duplicate=True),
+    Output("action-log", "children", allow_duplicate=True),
+    Output("store-ouija-history", "data"),
+    Output("ouija-history", "children"),
+    Input("btn-ouija", "n_clicks"),
+    State("input-ouija", "value"),
+    State("store-ouija-response", "data"),
+    State("store-ouija-history", "data"),
+    State("slider-radius", "value"),
+    State("slider-angle-sep", "value"),
+    State("slider-spacing", "value"),
+    prevent_initial_call=True,
+)
+def run_ouija_simulation(n_clicks, question, response, history, radius, angle_sep, spacing):
+    """Ouija mode: write the spirit's response."""
+    if not response:
+        return no_update, no_update, no_update, no_update
+
+    sim_data, log_items = _run_writer(response, radius, angle_sep, spacing)
+
+    # Update history
+    new_entry = {"question": question, "answer": response}
+    updated_history = (history or []) + [new_entry]
+
+    # Build history display
+    history_items = []
+    for entry in reversed(updated_history[-10:]):
+        history_items.append(html.Div([
+            html.Span(f"Q: {entry['question']}", className="text-muted"),
+            html.Br(),
+            html.Span(f"A: {entry['answer']}", className="text-warning fw-bold"),
+        ], className="mb-2 border-bottom border-secondary pb-1"))
+
+    return sim_data, log_items, updated_history, history_items
 
 
 @callback(
@@ -414,9 +499,10 @@ def update_3d_view(sim_data, frame, j1, j2, j3, j4, j5, active_tab, reset_clicks
         wl_data = sim_data.get("writing_line", {})
         if wl_data:
             wl = WritingLine(
-                start_xyz=np.array(wl_data["start"]),
-                direction=np.array(wl_data["direction"]),
-                spacing_mm=wl_data["spacing_mm"],
+                radius_mm=wl_data.get("radius_mm", 300.0),
+                center_angle_deg=wl_data.get("center_angle_deg", -25.0),
+                angular_spacing_deg=wl_data.get("angular_spacing_deg", 4.0),
+                height_mm=wl_data.get("height_mm", 50.0),
             )
             for t in create_writing_line_traces(wl):
                 fig.add_trace(t)
@@ -428,7 +514,7 @@ def update_3d_view(sim_data, frame, j1, j2, j3, j4, j5, active_tab, reset_clicks
         bc = BlockCircle(radius_mm=radius, min_angular_separation_deg=angle_sep)
         for t in create_block_circle_traces(bc):
             fig.add_trace(t)
-        wl = WritingLine(spacing_mm=spacing)
+        wl = WritingLine(radius_mm=radius + 20, angular_spacing_deg=spacing)
         for t in create_writing_line_traces(wl):
             fig.add_trace(t)
 

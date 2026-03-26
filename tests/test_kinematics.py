@@ -54,11 +54,16 @@ class TestInverseKinematics:
 
     def test_roundtrip(self):
         """compute_for_position -> FK should reach the target position."""
-        # Use a known reachable position in the workspace
-        target = np.array([350.0, 0.0, 100.0])
-        recovered = self.ik.compute_for_position(target, approach_angle_deg=-90.0)
+        target = np.array([300.0, 0.0, 50.0])
+        recovered = self.ik.compute_for_position(target, approach_angle_deg=-70.0)
         recovered_pos = self.fk.compute(recovered)["position"]
+        np.testing.assert_allclose(target, recovered_pos, atol=2.0)
 
+    def test_roundtrip_default_orientation(self):
+        """IK with default (gripper down) orientation -> FK roundtrip."""
+        target = np.array([350.0, 0.0, 100.0])
+        recovered = self.ik.compute(target, orientation=None)
+        recovered_pos = self.fk.compute(recovered)["position"]
         np.testing.assert_allclose(target, recovered_pos, atol=2.0)
 
     def test_unreachable_target(self):
