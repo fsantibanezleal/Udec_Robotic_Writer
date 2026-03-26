@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "udec-robotic-writer"
+version = "2.0.0"
+description = "Modern simulation and control system for a robotic arm letter-block writer"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+authors = [
+    {name = "Felipe Santibanez"},
+]
+
+dependencies = [
+    "numpy>=1.26",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pydantic>=2.6",
+    "dash>=2.15",
+    "dash-bootstrap-components>=1.5",
+    "plotly>=5.18",
+]
+
+[project.optional-dependencies]
+hardware = [
+    "pyserial>=3.5",
+]
+matlab = [
+    "matlabengine",
+]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "ruff>=0.3",
+]
+
+[project.scripts]
+robotic-writer-gui = "src.frontend.app:app.run_server"
+robotic-writer-api = "run_api:main"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
