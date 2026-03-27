@@ -85,3 +85,58 @@ This allows development, testing, and demonstration without physical hardware.
 | Frame 3 | Joint 3 axis | After elbow rotation |
 | Frame 4 | Joint 4 axis | After pitch rotation |
 | Frame 5 (EE) | Gripper tip | End-effector frame |
+
+## 6. Block Circle Geometry
+
+N letter blocks (A-Z, N=26) are arranged on a circular arc of radius R centered at the robot base. The position of block k is:
+
+```
+x_k = R * cos(theta_0 + k * delta_theta)
+y_k = R * sin(theta_0 + k * delta_theta)
+z_k = h_table (constant surface height)
+```
+
+where:
+- `theta_0 = -(N-1) * delta_theta / 2` centers the arc symmetrically about the forward direction
+- `delta_theta = 8 degrees` is the angular separation between adjacent blocks
+- The total arc spans from `theta_min = theta_0` to `theta_max = theta_0 + (N-1) * delta_theta`
+- Total angular span: `(N-1) * delta_theta = 25 * 8 = 200 degrees`
+
+The circular arrangement guarantees that every block is at the same radial distance from the robot base, ensuring uniform reachability and consistent approach geometry for the gripper.
+
+## 7. Writing Line Geometry
+
+Letters are placed sequentially along a writing arc (or line) at fixed spacing. For the arc-based layout (current implementation), the position of letter j in the word is:
+
+```
+x_j = R_write * cos(theta_center + j * angular_spacing)
+y_j = R_write * sin(theta_center + j * angular_spacing)
+z_j = z_surface
+```
+
+where:
+- `R_write = R_block + offset` (default offset = 60 mm)
+- `theta_center` is the angular center of the writing zone (default -25 degrees)
+- `angular_spacing = 4 degrees` between adjacent letter slots
+
+For the simplified linear layout:
+```
+x_j = x_start + j * spacing
+y_j = y_line
+z_j = z_surface
+```
+
+where `spacing = 30 mm` between block centers. The linear layout is simpler but can extend beyond the workspace for long words, which is why the arc-based layout was adopted in v2.2.
+
+## 8. Ouija Mode
+
+In Ouija mode, the robot acts as a "spirit board" spelling out answers to user questions. The decision flow is:
+
+1. **Question input**: User types a question into the interface
+2. **Classification**: The question is classified by its first word into categories (Yes/No, Who, When, Where, What, How, Greeting, or Mysterious)
+3. **Response generation**: A response is randomly selected from a curated pool matching the question category. There is a 20% chance of overriding any category with a "mysterious" response (e.g., "BEWARE", "WAKE UP")
+4. **Letter sequence**: The response string is converted to a sequence of letter indices
+5. **Trajectory planning**: For each letter, the inverse kinematics and pick-and-place trajectory are computed
+6. **Execution**: The robot picks each letter block from the circle and places it on the writing arc, spelling out the response
+
+The Ouija mode reuses the same pick-and-place infrastructure as Tutorial mode. The key difference is that the text comes from the response generator rather than direct user input. With `infinite_replacement` enabled (default), the same letter block can be reused for repeated characters in the response.

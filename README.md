@@ -178,7 +178,7 @@ pip install -r requirements.txt
 python run_frontend.py
 ```
 
-Then open **http://localhost:8050** in your browser.
+Then open **http://localhost:8055** in your browser.
 
 **Features:**
 - Type any text and click **Run Simulation** to see the robot write it
@@ -192,7 +192,7 @@ Then open **http://localhost:8050** in your browser.
 python run_api.py
 ```
 
-API documentation available at **http://localhost:8000/docs** (Swagger UI).
+API documentation available at **http://localhost:8005/docs** (Swagger UI).
 
 **Key endpoints:**
 

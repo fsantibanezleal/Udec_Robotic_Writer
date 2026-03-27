@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrW" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7aa2f7"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="700" height="500" fill="#0d1117" rx="10"/>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#c0caf5">
+    Scorbot III Workspace — Top-Down View
+  </text>
+
+  <!-- Reachable workspace boundary (outer) -->
+  <circle cx="350" cy="280" r="200" fill="none" stroke="#565f89" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="560" y="175" font-size="10" fill="#565f89">R_max = 591 mm</text>
+
+  <!-- Reachable workspace boundary (inner) -->
+  <circle cx="350" cy="280" r="25" fill="none" stroke="#565f89" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Workspace fill (partial, showing 253 deg range) -->
+  <path d="M 350,280 L 195,105 A 200,200 0 1,1 195,455 Z" fill="#7aa2f7" opacity="0.06"/>
+  <text x="490" y="440" font-size="10" fill="#7aa2f7">Reachable workspace</text>
+  <text x="490" y="455" font-size="10" fill="#7aa2f7">(253 deg base range)</text>
+
+  <!-- Block circle arc (A-Z) -->
+  <circle cx="350" cy="280" r="150" fill="none" stroke="#51cf66" stroke-width="2" stroke-dasharray="0"/>
+  <!-- Only draw the upper arc portion with blocks -->
+  <path d="M 205,215 A 150,150 0 1,1 205,345" fill="none" stroke="#51cf66" stroke-width="2"/>
+
+  <!-- Letter blocks on arc -->
+  <g font-size="8" font-weight="bold" text-anchor="middle">
+    <!-- A (leftmost) -->
+    <rect x="194" y="200" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="202" y="212" fill="#0d1117">A</text>
+    <!-- D -->
+    <rect x="210" y="162" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="218" y="174" fill="#0d1117">D</text>
+    <!-- G -->
+    <rect x="240" y="135" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="248" y="147" fill="#0d1117">G</text>
+    <!-- J -->
+    <rect x="280" y="118" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="288" y="130" fill="#0d1117">J</text>
+    <!-- M -->
+    <rect x="330" y="112" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="338" y="124" fill="#0d1117">M</text>
+    <!-- N (near top) -->
+    <rect x="360" y="112" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="368" y="124" fill="#0d1117">N</text>
+    <!-- Q -->
+    <rect x="400" y="118" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="408" y="130" fill="#0d1117">Q</text>
+    <!-- T -->
+    <rect x="440" y="135" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="448" y="147" fill="#0d1117">T</text>
+    <!-- W -->
+    <rect x="470" y="162" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="478" y="174" fill="#0d1117">W</text>
+    <!-- Z (rightmost) -->
+    <rect x="487" y="200" width="16" height="16" rx="2" fill="#51cf66" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="495" y="212" fill="#0d1117">Z</text>
+    <!-- Ellipsis between shown blocks -->
+    <text x="203" y="185" fill="#51cf66" font-size="10">...</text>
+    <text x="226" y="150" fill="#51cf66" font-size="10">...</text>
+    <text x="260" y="128" fill="#51cf66" font-size="10">...</text>
+    <text x="310" y="116" fill="#51cf66" font-size="10">...</text>
+    <text x="382" y="116" fill="#51cf66" font-size="10">...</text>
+    <text x="422" y="128" fill="#51cf66" font-size="10">...</text>
+    <text x="458" y="150" fill="#51cf66" font-size="10">...</text>
+    <text x="482" y="185" fill="#51cf66" font-size="10">...</text>
+  </g>
+
+  <!-- Pick zone label -->
+  <text x="350" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#51cf66">Pick Zone (Block Circle)</text>
+  <text x="350" y="88" text-anchor="middle" font-size="10" fill="#565f89">R = 350 mm, 26 blocks, delta_theta = 8 deg</text>
+
+  <!-- Writing arc (place zone) -->
+  <path d="M 245,370 A 170,170 0 0,0 370,415" fill="none" stroke="#e0af68" stroke-width="2.5"/>
+
+  <!-- Placed letters on writing arc -->
+  <g font-size="8" font-weight="bold" text-anchor="middle">
+    <rect x="237" y="362" width="16" height="16" rx="2" fill="#e0af68" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="245" y="374" fill="#0d1117">H</text>
+    <rect x="257" y="375" width="16" height="16" rx="2" fill="#e0af68" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="265" y="387" fill="#0d1117">E</text>
+    <rect x="280" y="385" width="16" height="16" rx="2" fill="#e0af68" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="288" y="397" fill="#0d1117">L</text>
+    <rect x="305" y="393" width="16" height="16" rx="2" fill="#e0af68" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="313" y="405" fill="#0d1117">L</text>
+    <rect x="330" y="400" width="16" height="16" rx="2" fill="#e0af68" stroke="#0d1117" stroke-width="0.5"/>
+    <text x="338" y="412" fill="#0d1117">O</text>
+    <!-- Empty slots -->
+    <rect x="355" y="407" width="16" height="16" rx="2" fill="none" stroke="#e0af68" stroke-width="1" stroke-dasharray="3,2"/>
+    <rect x="375" y="410" width="16" height="16" rx="2" fill="none" stroke="#e0af68" stroke-width="1" stroke-dasharray="3,2"/>
+  </g>
+
+  <!-- Place zone label -->
+  <text x="320" y="445" text-anchor="middle" font-size="12" font-weight="bold" fill="#e0af68">Place Zone (Writing Arc)</text>
+  <text x="320" y="460" text-anchor="middle" font-size="10" fill="#565f89">R_write = R + offset, angular_spacing = 4 deg</text>
+
+  <!-- Robot base -->
+  <circle cx="350" cy="280" r="15" fill="#30363d" stroke="#c0caf5" stroke-width="2"/>
+  <circle cx="350" cy="280" r="5" fill="#565f89"/>
+  <text x="350" y="305" text-anchor="middle" font-size="11" font-weight="bold" fill="#c0caf5">Robot Base</text>
+
+  <!-- Home position indicator -->
+  <circle cx="350" cy="240" r="6" fill="none" stroke="#f7768e" stroke-width="1.5"/>
+  <text x="350" y="238" text-anchor="middle" font-size="6" fill="#f7768e">H</text>
+  <text x="375" y="237" font-size="9" fill="#f7768e">Home</text>
+
+  <!-- Radius annotation to block circle -->
+  <line x1="350" y1="280" x2="448" y2="143" stroke="#7aa2f7" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrW)"/>
+  <text x="420" y="200" font-size="10" fill="#7aa2f7" transform="rotate(-47,420,200)">R = 350 mm</text>
+
+  <!-- Legend -->
+  <g transform="translate(540,50)">
+    <rect x="0" y="0" width="145" height="115" rx="5" fill="#1a1b26" stroke="#30363d" stroke-width="1"/>
+    <text x="72" y="18" text-anchor="middle" font-size="10" font-weight="bold" fill="#c0caf5">Legend</text>
+    <rect x="10" y="28" width="12" height="10" rx="2" fill="#51cf66"/>
+    <text x="28" y="37" font-size="9" fill="#a9b1d6">Block (pick zone)</text>
+    <rect x="10" y="45" width="12" height="10" rx="2" fill="#e0af68"/>
+    <text x="28" y="54" font-size="9" fill="#a9b1d6">Placed letter</text>
+    <circle cx="16" cy="68" r="5" fill="#30363d" stroke="#c0caf5" stroke-width="1"/>
+    <text x="28" y="72" font-size="9" fill="#a9b1d6">Robot base</text>
+    <line x1="10" y1="85" x2="22" y2="85" stroke="#565f89" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="28" y="89" font-size="9" fill="#a9b1d6">Workspace boundary</text>
+    <circle cx="16" cy="102" r="4" fill="none" stroke="#f7768e" stroke-width="1"/>
+    <text x="28" y="106" font-size="9" fill="#a9b1d6">Home position</text>
+  </g>
+</svg>
