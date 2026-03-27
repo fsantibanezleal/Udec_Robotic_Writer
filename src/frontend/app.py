@@ -690,4 +690,4 @@ def update_frame(_interval, _start, _end, _prev, _next,
 server = app.server
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8050)
+    app.run(debug=True, port=8055)

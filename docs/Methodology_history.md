@@ -168,13 +168,36 @@ theta234 = math.atan2(-ux_eff, uz_eff)
 
 ### Key equations preserved
 
-All original DH parameters and kinematic equations were ported to Python with NumPy matrix operations. The homogeneous transformation matrix per joint:
+All original DH parameters and kinematic equations were ported to Python with NumPy matrix operations. Each homogeneous transformation is the product of four elementary transforms:
+
+```
+A_i = Rz(theta_i) * Tz(d_i) * Tx(a_i) * Rx(alpha_i)
+```
+
+Expanded as a single 4x4 matrix:
 
 ```
 A_i = [[cos(t), -cos(a)*sin(t),  sin(a)*sin(t), a_i*cos(t)],
        [sin(t),  cos(a)*cos(t), -sin(a)*cos(t), a_i*sin(t)],
        [0,       sin(a),         cos(a),         d_i       ],
        [0,       0,              0,              1         ]]
+```
+
+Forward kinematics chain:
+
+```
+T_05 = A_1 * A_2 * A_3 * A_4 * A_5
+```
+
+Inverse kinematics (analytical closed-form):
+
+```
+theta1 = atan2(qy, qx)
+theta5 = asin(ux*sin(theta1) - uy*cos(theta1))
+theta234 = atan2(-ux_eff, uz_eff)
+theta3 = acos((k1^2 + k2^2 - a2^2 - a3^2) / (2*a2*a3))
+theta2 = atan2(sin2, cos2)
+theta4 = theta234 - theta2 - theta3
 ```
 
 ### Block Circle geometry
