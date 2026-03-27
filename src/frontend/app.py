@@ -227,6 +227,10 @@ sidebar = dbc.Card([
                                        3, 20, 8, 0.5),
                     make_config_slider("slider-spacing", "Slot Spacing (deg)",
                                        2, 8, 4, 0.5),
+                    make_config_slider("slider-write-angle", "Writing Arc Angle (deg)",
+                                       -90, 90, -25, 5),
+                    make_config_slider("slider-write-offset", "Writing Radial Offset (mm)",
+                                       20, 150, 60, 5),
                     dbc.Switch(
                         id="switch-infinite",
                         label="Infinite block replacement",
@@ -305,7 +309,7 @@ main_content = html.Div([
                                    marks=None,
                                    tooltip={"placement": "bottom",
                                             "always_visible": True}),
-                    ], style={"marginBottom": "20px"}),
+                    ], style={"marginBottom": "36px"}),
                     dbc.ButtonGroup([
                         dbc.Button("<<", id="btn-start", size="sm", color="info",
                                    n_clicks=0),
@@ -318,7 +322,27 @@ main_content = html.Div([
                         dbc.Button(">>", id="btn-end", size="sm", color="info",
                                    n_clicks=0),
                     ], className="w-100 d-flex justify-content-center"),
-                    dcc.Interval(id="interval-play", interval=80, disabled=True,
+                    html.Div([
+                        html.Label("Speed:", className="text-light me-2",
+                                   style={"fontSize": "0.8rem"}),
+                        dbc.RadioItems(
+                            id="radio-speed",
+                            options=[
+                                {"label": "1x", "value": 5},
+                                {"label": "2x", "value": 10},
+                                {"label": "5x", "value": 25},
+                                {"label": "10x", "value": 50},
+                                {"label": "Max", "value": 100},
+                            ],
+                            value=10,
+                            inline=True,
+                            className="text-light",
+                            inputClassName="me-1",
+                            labelClassName="me-3",
+                            labelStyle={"fontSize": "0.8rem", "cursor": "pointer"},
+                        ),
+                    ], className="d-flex align-items-center mt-2"),
+                    dcc.Interval(id="interval-play", interval=250, disabled=True,
                                  n_intervals=0),
                 ], className="py-2"),
             ], style={"backgroundColor": "rgba(40,40,40,1)"}),
@@ -364,6 +388,7 @@ app.layout = dbc.Container([
 # ═══════════════════════════════════════════════════════════════════════════
 
 def _run_writer(text: str, radius: float, angle_sep: float, spacing: float,
+                write_angle: float = -25.0, write_offset: float = 60.0,
                 infinite: bool = True):
     """Execute writer simulation. Returns (sim_data, log_html)."""
     block_circle = BlockCircle(
@@ -372,7 +397,8 @@ def _run_writer(text: str, radius: float, angle_sep: float, spacing: float,
         min_angular_separation_deg=angle_sep,
     )
     writing_line = WritingLine(
-        radius_mm=radius + 20,
+        radius_mm=radius + write_offset,
+        center_angle_deg=write_angle,
         angular_spacing_deg=spacing,
     )
     robot = ScorbotIII(interpolation_steps=30)
@@ -408,14 +434,17 @@ def _run_writer(text: str, radius: float, angle_sep: float, spacing: float,
     State("slider-radius", "value"),
     State("slider-angle-sep", "value"),
     State("slider-spacing", "value"),
+    State("slider-write-angle", "value"),
+    State("slider-write-offset", "value"),
     State("switch-infinite", "value"),
     prevent_initial_call=True,
 )
-def run_tutorial(n_clicks, text, radius, angle_sep, spacing, infinite):
+def run_tutorial(n_clicks, text, radius, angle_sep, spacing, write_angle,
+                 write_offset, infinite):
     if not text:
         return no_update, no_update, no_update
     sim_data, log_items = _run_writer(text.upper(), radius, angle_sep, spacing,
-                                      infinite)
+                                      write_angle, write_offset, infinite)
     return sim_data, log_items, 0
 
 
@@ -455,16 +484,18 @@ def preview_ouija(question, _reroll):
     State("slider-radius", "value"),
     State("slider-angle-sep", "value"),
     State("slider-spacing", "value"),
+    State("slider-write-angle", "value"),
+    State("slider-write-offset", "value"),
     State("switch-infinite", "value"),
     prevent_initial_call=True,
 )
 def run_ouija(n_clicks, question, response, history, radius, angle_sep, spacing,
-              infinite):
+              write_angle, write_offset, infinite):
     if not response:
         return no_update, no_update, no_update, no_update, no_update
 
     sim_data, log_items = _run_writer(response, radius, angle_sep, spacing,
-                                      infinite)
+                                      write_angle, write_offset, infinite)
 
     updated_history = (history or []) + [{"question": question, "answer": response}]
 
@@ -495,9 +526,12 @@ def run_ouija(n_clicks, question, response, history, radius, angle_sep, spacing,
     State("slider-radius", "value"),
     State("slider-angle-sep", "value"),
     State("slider-spacing", "value"),
+    State("slider-write-angle", "value"),
+    State("slider-write-offset", "value"),
 )
 def update_3d_view(sim_data, frame, j1, j2, j3, j4, j5, active_tab,
-                   reset_clicks, radius, angle_sep, spacing):
+                   reset_clicks, radius, angle_sep, spacing, write_angle,
+                   write_offset):
     traces = []
 
     if active_tab == "tab-kinematics":
@@ -556,7 +590,9 @@ def update_3d_view(sim_data, frame, j1, j2, j3, j4, j5, active_tab,
         chars = [b.character for b in bc.blocks]
         avail = [True] * len(bc.blocks)
         traces.extend(create_block_circle_traces(pos, chars, avail))
-        wl = WritingLine(radius_mm=radius + 20, angular_spacing_deg=spacing)
+        wl = WritingLine(radius_mm=radius + write_offset,
+                         center_angle_deg=write_angle,
+                         angular_spacing_deg=spacing)
         traces.extend(create_writing_line_traces(wl))
 
     return build_figure(traces)
@@ -612,9 +648,33 @@ def toggle_play(n_clicks, playing):
     return (not new_playing), new_playing, ("Pause" if new_playing else "Play")
 
 
-# ── Frame navigation (play interval + buttons) ───────────────────────────
+# ── Frame navigation (clientside for zero-latency) ───────────────────────
 
-@callback(
+app.clientside_callback(
+    """
+    function(n_intervals, startClk, endClk, prevClk, nextClk, curFrame, maxFrame, speed) {
+        const triggered = dash_clientside.callback_context.triggered;
+        if (!triggered || triggered.length === 0) return dash_clientside.no_update;
+
+        const id = triggered[0].prop_id.split(".")[0];
+        const step = speed || 10;
+        const cur = curFrame || 0;
+
+        if (id === "interval-play") {
+            const nf = cur + step;
+            return nf <= maxFrame ? nf : 0;
+        } else if (id === "btn-start") {
+            return 0;
+        } else if (id === "btn-end") {
+            return maxFrame;
+        } else if (id === "btn-prev") {
+            return Math.max(0, cur - step);
+        } else if (id === "btn-next") {
+            return Math.min(maxFrame, cur + step);
+        }
+        return dash_clientside.no_update;
+    }
+    """,
     Output("slider-frame", "value"),
     Input("interval-play", "n_intervals"),
     Input("btn-start", "n_clicks"),
@@ -623,27 +683,9 @@ def toggle_play(n_clicks, playing):
     Input("btn-next", "n_clicks"),
     State("slider-frame", "value"),
     State("slider-frame", "max"),
+    State("radio-speed", "value"),
     prevent_initial_call=True,
 )
-def update_frame(_n_intervals, _start, _end, _prev, _next,
-                 current_frame, max_frame):
-    trigger_id = ctx.triggered_id
-    if trigger_id is None:
-        return no_update
-
-    if trigger_id == "interval-play":
-        nf = (current_frame or 0) + 3
-        return nf if nf <= max_frame else 0
-    elif trigger_id == "btn-start":
-        return 0
-    elif trigger_id == "btn-end":
-        return max_frame
-    elif trigger_id == "btn-prev":
-        return max(0, (current_frame or 0) - 5)
-    elif trigger_id == "btn-next":
-        return min(max_frame, (current_frame or 0) + 5)
-
-    return no_update
 
 
 # ── Server ────────────────────────────────────────────────────────────────
