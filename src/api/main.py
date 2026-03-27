@@ -277,6 +277,114 @@ async def hardware_status():
     }
 
 
+@app.get("/api/trajectory-frames")
+async def trajectory_frames(
+    text: str = "HELLO",
+    block_radius_mm: float = 280.0,
+    block_height_mm: float = 50.0,
+    min_angular_separation_deg: float = 8.0,
+    writing_radius_mm: float = 300.0,
+    writing_center_angle_deg: float = -25.0,
+    writing_angular_spacing_deg: float = 4.0,
+    frame_step: int = 5,
+):
+    """Return animation frames for a writing trajectory.
+
+    Computes the full pick-and-place trajectory for the given text and
+    returns a list of frames suitable for Plotly animation. Each frame
+    contains joint positions, end-effector position, gripper aperture,
+    and timestamp.
+
+    The frontend can use these frames with plotly.graph_objects.Frame
+    to animate the robot arm movement in 3D.
+
+    Args:
+        text: Text to write (max 15 characters).
+        block_radius_mm: Radius of the letter block circle.
+        block_height_mm: Height of blocks above ground.
+        min_angular_separation_deg: Angular separation between blocks.
+        writing_radius_mm: Radius of the writing arc.
+        writing_center_angle_deg: Center angle of the writing arc.
+        writing_angular_spacing_deg: Angular spacing between writing slots.
+        frame_step: Sample every N-th trajectory step to reduce payload.
+            Set to 1 for all frames.
+
+    Returns:
+        JSON with:
+        - text: The input text
+        - total_steps: Total trajectory steps before subsampling
+        - frames: List of frame dicts with keys:
+            - index: Frame index
+            - timestamp: Time in seconds
+            - joint_angles_deg: [j1, j2, j3, j4, j5]
+            - joint_positions: [[x,y,z], ...] for each joint frame
+            - end_effector: {x, y, z}
+            - gripper_mm: Gripper aperture
+    """
+    if not text or len(text) > 15:
+        raise HTTPException(400, detail="Text must be 1-15 characters")
+
+    text = text.upper()
+    frame_step = max(1, min(frame_step, 100))
+
+    try:
+        from ..core.kinematics import ForwardKinematics
+
+        block_circle = BlockCircle(
+            radius_mm=block_radius_mm,
+            block_height_mm=block_height_mm,
+            min_angular_separation_deg=min_angular_separation_deg,
+        )
+        writing_line = WritingLine(
+            radius_mm=writing_radius_mm,
+            center_angle_deg=writing_center_angle_deg,
+            angular_spacing_deg=writing_angular_spacing_deg,
+        )
+        robot = ScorbotIII(interpolation_steps=30)
+        writer = RoboticWriter(
+            robot=robot,
+            block_circle=block_circle,
+            writing_line=writing_line,
+            infinite_replacement=True,
+        )
+
+        action_log = writer.write_text(text)
+        traj_data = robot.get_trajectory_data()
+
+        fk = ForwardKinematics()
+        total_steps = len(traj_data["timestamps"])
+
+        frames = []
+        for i in range(0, total_steps, frame_step):
+            angles_deg = traj_data["joint_angles_deg"][i]
+            js = JointState.from_degrees(angles_deg)
+            joint_positions = fk.joint_positions(js)
+
+            frames.append({
+                "index": len(frames),
+                "timestamp": traj_data["timestamps"][i],
+                "joint_angles_deg": angles_deg,
+                "joint_positions": joint_positions.tolist(),
+                "end_effector": {
+                    "x": traj_data["positions"][i][0],
+                    "y": traj_data["positions"][i][1],
+                    "z": traj_data["positions"][i][2],
+                },
+                "gripper_mm": traj_data["gripper"][i],
+            })
+
+        return {
+            "text": text,
+            "total_steps": total_steps,
+            "frame_step": frame_step,
+            "n_frames": len(frames),
+            "action_log": action_log,
+            "frames": frames,
+        }
+    except Exception as e:
+        raise HTTPException(500, detail=str(e))
+
+
 @app.get("/api/health")
 async def health():
     """Health check endpoint."""
