@@ -227,6 +227,12 @@ sidebar = dbc.Card([
                                        3, 20, 8, 0.5),
                     make_config_slider("slider-spacing", "Slot Spacing (deg)",
                                        2, 8, 4, 0.5),
+                    dbc.Switch(
+                        id="switch-infinite",
+                        label="Infinite block replacement",
+                        value=True,
+                        className="mb-3 text-light",
+                    ),
                     dbc.Button("Write It!", id="btn-simulate", color="primary",
                                className="w-100 mt-2", n_clicks=0),
                     dbc.Button("Reset", id="btn-reset", color="secondary",
@@ -357,7 +363,8 @@ app.layout = dbc.Container([
 # CALLBACKS
 # ═══════════════════════════════════════════════════════════════════════════
 
-def _run_writer(text: str, radius: float, angle_sep: float, spacing: float):
+def _run_writer(text: str, radius: float, angle_sep: float, spacing: float,
+                infinite: bool = True):
     """Execute writer simulation. Returns (sim_data, log_html)."""
     block_circle = BlockCircle(
         radius_mm=radius,
@@ -370,7 +377,8 @@ def _run_writer(text: str, radius: float, angle_sep: float, spacing: float):
     )
     robot = ScorbotIII(interpolation_steps=30)
     writer = RoboticWriter(robot=robot, block_circle=block_circle,
-                           writing_line=writing_line)
+                           writing_line=writing_line,
+                           infinite_replacement=infinite)
 
     action_log = writer.write_text(text)
     sim_data = writer.get_simulation_data()
@@ -400,12 +408,14 @@ def _run_writer(text: str, radius: float, angle_sep: float, spacing: float):
     State("slider-radius", "value"),
     State("slider-angle-sep", "value"),
     State("slider-spacing", "value"),
+    State("switch-infinite", "value"),
     prevent_initial_call=True,
 )
-def run_tutorial(n_clicks, text, radius, angle_sep, spacing):
+def run_tutorial(n_clicks, text, radius, angle_sep, spacing, infinite):
     if not text:
         return no_update, no_update, no_update
-    sim_data, log_items = _run_writer(text.upper(), radius, angle_sep, spacing)
+    sim_data, log_items = _run_writer(text.upper(), radius, angle_sep, spacing,
+                                      infinite)
     return sim_data, log_items, 0
 
 
@@ -445,13 +455,16 @@ def preview_ouija(question, _reroll):
     State("slider-radius", "value"),
     State("slider-angle-sep", "value"),
     State("slider-spacing", "value"),
+    State("switch-infinite", "value"),
     prevent_initial_call=True,
 )
-def run_ouija(n_clicks, question, response, history, radius, angle_sep, spacing):
+def run_ouija(n_clicks, question, response, history, radius, angle_sep, spacing,
+              infinite):
     if not response:
         return no_update, no_update, no_update, no_update, no_update
 
-    sim_data, log_items = _run_writer(response, radius, angle_sep, spacing)
+    sim_data, log_items = _run_writer(response, radius, angle_sep, spacing,
+                                      infinite)
 
     updated_history = (history or []) + [{"question": question, "answer": response}]
 

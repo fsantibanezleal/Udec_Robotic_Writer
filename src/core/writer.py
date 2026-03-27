@@ -185,10 +185,12 @@ class RoboticWriter:
         robot: Optional[ScorbotIII] = None,
         block_circle: Optional[BlockCircle] = None,
         writing_line: Optional[WritingLine] = None,
+        infinite_replacement: bool = True,
     ):
         self.robot = robot or ScorbotIII()
         self.block_circle = block_circle or BlockCircle()
         self.writing_line = writing_line or WritingLine()
+        self.infinite_replacement = infinite_replacement
         self._placed_count = 0
         self._action_log: list[dict] = []
         self._used_characters: set[str] = set()
@@ -257,6 +259,8 @@ class RoboticWriter:
         # 4. Close gripper (pick)
         self.robot.close_gripper()
         self._used_characters.add(char.upper())
+        if not self.infinite_replacement:
+            block.is_available = False
         self._log_action("pick", f"Picked block '{char}'")
 
         # 5. Lift to safe height
@@ -298,7 +302,8 @@ class RoboticWriter:
                 "positions": self.block_circle.get_arc_points().tolist(),
                 "characters": [b.character for b in self.block_circle.blocks],
                 "available": [
-                    b.character not in self._used_characters
+                    b.is_available if not self.infinite_replacement
+                    else b.character not in self._used_characters
                     for b in self.block_circle.blocks
                 ],
                 "angles_deg": self.block_circle.get_arc_angles_deg(),
