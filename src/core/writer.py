@@ -136,24 +136,34 @@ class BlockCircle:
 
 @dataclass
 class WritingLine:
-    """The linear target area where blocks are placed to form the word.
+    """Arc-shaped target area where blocks are placed to form the word.
 
-    Blocks are placed sequentially along a line at a fixed position,
-    with configurable spacing between them.
+    Blocks are placed sequentially along an arc at a fixed radius from the
+    robot base, ensuring all positions remain within the robot's workspace.
+    The arc is centered at a configurable angle with configurable angular spacing.
 
     Attributes:
-        start_xyz: Starting position of the writing line.
-        direction: Unit vector along the writing direction.
-        spacing_mm: Distance between block centers.
+        radius_mm: Distance from robot base to slot centers.
+        center_angle_deg: Center angle of the writing arc (degrees, 0=forward).
+        angular_spacing_deg: Angular separation between slots.
+        height_mm: Z-coordinate of slots (table surface).
     """
 
-    start_xyz: np.ndarray = field(default_factory=lambda: np.array([200.0, -120.0, 50.0]))
-    direction: np.ndarray = field(default_factory=lambda: np.array([1.0, 0.0, 0.0]))
-    spacing_mm: float = 25.0
+    radius_mm: float = 300.0
+    center_angle_deg: float = -25.0
+    angular_spacing_deg: float = 4.0
+    height_mm: float = 50.0
 
     def slot_position(self, index: int) -> np.ndarray:
-        """Get the 3D position for the i-th block slot."""
-        return self.start_xyz + index * self.spacing_mm * self.direction
+        """Get the 3D position for the i-th block slot on the arc."""
+        angle = math.radians(self.center_angle_deg) + index * math.radians(self.angular_spacing_deg)
+        x = self.radius_mm * math.cos(angle)
+        y = self.radius_mm * math.sin(angle)
+        return np.array([x, y, self.height_mm])
+
+    def get_slot_positions(self, num_slots: int) -> np.ndarray:
+        """Get positions of multiple slots as (N, 3) array."""
+        return np.array([self.slot_position(i) for i in range(num_slots)])
 
 
 class RoboticWriter:
@@ -163,8 +173,8 @@ class RoboticWriter:
     BlockCircle and place them on the WritingLine to spell a word.
     """
 
-    SAFE_HEIGHT_MM = 100.0  # Height to lift to between pick and place
-    APPROACH_ANGLE_DEG = -70.0  # Near-vertical approach (tilted for reachability)
+    SAFE_HEIGHT_MM = 75.0  # Height to lift to between pick and place
+    APPROACH_ANGLE_DEG = -70.0  # Near-vertical approach (tilted for better reachability)
     GRIPPER_OPEN_MM = 40.0
     PICK_DURATION = 1.5
     MOVE_DURATION = 2.0
@@ -175,12 +185,15 @@ class RoboticWriter:
         robot: Optional[ScorbotIII] = None,
         block_circle: Optional[BlockCircle] = None,
         writing_line: Optional[WritingLine] = None,
+        infinite_replacement: bool = True,
     ):
         self.robot = robot or ScorbotIII()
         self.block_circle = block_circle or BlockCircle()
         self.writing_line = writing_line or WritingLine()
+        self.infinite_replacement = infinite_replacement
         self._placed_count = 0
         self._action_log: list[dict] = []
+        self._used_characters: set[str] = set()
 
     def write_text(self, text: str) -> list[dict]:
         """Execute the full writing sequence for a text string.
@@ -245,7 +258,9 @@ class RoboticWriter:
 
         # 4. Close gripper (pick)
         self.robot.close_gripper()
-        block.is_available = False
+        self._used_characters.add(char.upper())
+        if not self.infinite_replacement:
+            block.is_available = False
         self._log_action("pick", f"Picked block '{char}'")
 
         # 5. Lift to safe height
@@ -286,14 +301,19 @@ class RoboticWriter:
             "block_circle": {
                 "positions": self.block_circle.get_arc_points().tolist(),
                 "characters": [b.character for b in self.block_circle.blocks],
-                "available": [b.is_available for b in self.block_circle.blocks],
+                "available": [
+                    b.is_available if not self.infinite_replacement
+                    else b.character not in self._used_characters
+                    for b in self.block_circle.blocks
+                ],
                 "angles_deg": self.block_circle.get_arc_angles_deg(),
                 "radius_mm": self.block_circle.radius_mm,
             },
             "writing_line": {
-                "start": self.writing_line.start_xyz.tolist(),
-                "direction": self.writing_line.direction.tolist(),
-                "spacing_mm": self.writing_line.spacing_mm,
+                "radius_mm": self.writing_line.radius_mm,
+                "center_angle_deg": self.writing_line.center_angle_deg,
+                "angular_spacing_deg": self.writing_line.angular_spacing_deg,
+                "height_mm": self.writing_line.height_mm,
             },
         }
 
@@ -304,3 +324,4 @@ class RoboticWriter:
         self.robot.reset_trajectory_log()
         self._placed_count = 0
         self._action_log = []
+        self._used_characters = set()

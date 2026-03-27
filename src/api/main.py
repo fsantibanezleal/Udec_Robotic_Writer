@@ -41,13 +41,12 @@ class CartesianRequest(BaseModel):
 class WriteRequest(BaseModel):
     """Request to write a text string."""
     text: str = Field(..., min_length=1, max_length=50)
-    block_radius_mm: float = Field(350.0, ge=200.0, le=600.0)
+    block_radius_mm: float = Field(280.0, ge=200.0, le=400.0)
     block_height_mm: float = Field(50.0, ge=0.0, le=200.0)
     min_angular_separation_deg: float = Field(8.0, ge=3.0, le=20.0)
-    writing_line_x: float = 300.0
-    writing_line_y: float = -200.0
-    writing_line_z: float = 50.0
-    block_spacing_mm: float = Field(30.0, ge=15.0, le=60.0)
+    writing_radius_mm: float = 300.0
+    writing_center_angle_deg: float = -25.0
+    writing_angular_spacing_deg: float = Field(4.0, ge=2.0, le=8.0)
 
 
 class HardwareConnectRequest(BaseModel):
@@ -159,8 +158,9 @@ async def simulate_writing(req: WriteRequest):
             min_angular_separation_deg=req.min_angular_separation_deg,
         )
         writing_line = WritingLine(
-            start_xyz=np.array([req.writing_line_x, req.writing_line_y, req.writing_line_z]),
-            spacing_mm=req.block_spacing_mm,
+            radius_mm=req.writing_radius_mm,
+            center_angle_deg=req.writing_center_angle_deg,
+            angular_spacing_deg=req.writing_angular_spacing_deg,
         )
         robot = ScorbotIII()
         writer = RoboticWriter(robot=robot, block_circle=block_circle, writing_line=writing_line)
