@@ -648,33 +648,9 @@ def toggle_play(n_clicks, playing):
     return (not new_playing), new_playing, ("Pause" if new_playing else "Play")
 
 
-# ── Frame navigation (clientside for zero-latency) ───────────────────────
+# ── Frame navigation ──────────────────────────────────────────────────────
 
-app.clientside_callback(
-    """
-    function(n_intervals, startClk, endClk, prevClk, nextClk, curFrame, maxFrame, speed) {
-        const triggered = dash_clientside.callback_context.triggered;
-        if (!triggered || triggered.length === 0) return dash_clientside.no_update;
-
-        const id = triggered[0].prop_id.split(".")[0];
-        const step = speed || 10;
-        const cur = curFrame || 0;
-
-        if (id === "interval-play") {
-            const nf = cur + step;
-            return nf <= maxFrame ? nf : 0;
-        } else if (id === "btn-start") {
-            return 0;
-        } else if (id === "btn-end") {
-            return maxFrame;
-        } else if (id === "btn-prev") {
-            return Math.max(0, cur - step);
-        } else if (id === "btn-next") {
-            return Math.min(maxFrame, cur + step);
-        }
-        return dash_clientside.no_update;
-    }
-    """,
+@callback(
     Output("slider-frame", "value"),
     Input("interval-play", "n_intervals"),
     Input("btn-start", "n_clicks"),
@@ -686,6 +662,27 @@ app.clientside_callback(
     State("radio-speed", "value"),
     prevent_initial_call=True,
 )
+def update_frame(_interval, _start, _end, _prev, _next,
+                 current_frame, max_frame, speed):
+    trigger = ctx.triggered_id
+    if trigger is None:
+        return no_update
+
+    step = speed or 10
+    cur = current_frame or 0
+
+    if trigger == "interval-play":
+        nf = cur + step
+        return nf if nf <= max_frame else 0
+    if trigger == "btn-start":
+        return 0
+    if trigger == "btn-end":
+        return max_frame
+    if trigger == "btn-prev":
+        return max(0, cur - step)
+    if trigger == "btn-next":
+        return min(max_frame, cur + step)
+    return no_update
 
 
 # ── Server ────────────────────────────────────────────────────────────────
