@@ -21,6 +21,7 @@ from ..core.kinematics import ForwardKinematics, InverseKinematics, JointState, 
 from ..core.robot import ScorbotIII
 from ..core.writer import RoboticWriter, BlockCircle, WritingLine
 from ..core.rrt_planner import RRTPlanner
+from ..core.cursive import generate_cursive_path
 
 
 # ── Pydantic models ────────────────────────────────────────────────────────
@@ -436,6 +437,59 @@ async def rrt_plan(req: RRTPlanRequest):
         "num_waypoints": len(path),
         "start_deg": req.start_deg,
         "goal_deg": req.goal_deg,
+    }
+
+
+@app.get("/api/cursive-path")
+async def cursive_path(
+    text: str = "hello",
+    letter_width: float = 15.0,
+    letter_height: float = 20.0,
+    spacing: float = 2.0,
+    points_per_segment: int = 15,
+):
+    """Generate a cursive Bezier path for the given text.
+
+    Returns a list of (x, y) points forming a continuous cursive path.
+    Pen-up events (spaces between words) are represented as null entries.
+
+    Args:
+        text: Text to write in cursive (will be lowercased).
+        letter_width: Width of each letter in mm.
+        letter_height: Height of each letter in mm.
+        spacing: Extra spacing between letters in mm.
+        points_per_segment: Points per Bezier segment.
+    """
+    if not text or len(text) > 100:
+        raise HTTPException(400, detail="Text must be 1-100 characters")
+
+    path = generate_cursive_path(
+        text,
+        letter_width=letter_width,
+        letter_height=letter_height,
+        spacing=spacing,
+        points_per_segment=points_per_segment,
+    )
+
+    # Separate into segments (split at None pen-up markers)
+    segments = []
+    current_segment = []
+    for pt in path:
+        if pt is None:
+            if current_segment:
+                segments.append(current_segment)
+                current_segment = []
+        else:
+            current_segment.append({"x": pt[0], "y": pt[1]})
+    if current_segment:
+        segments.append(current_segment)
+
+    return {
+        "text": text.lower(),
+        "total_points": sum(len(s) for s in segments),
+        "num_segments": len(segments),
+        "segments": segments,
+        "path": [{"x": pt[0], "y": pt[1]} if pt is not None else None for pt in path],
     }
 
 
