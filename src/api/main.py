@@ -187,20 +187,21 @@ async def get_writer_config():
     """Get current writer configuration defaults."""
     return {
         "block_circle": {
-            "radius_mm": 350.0,
+            "radius_mm": 280.0,
             "block_height_mm": 50.0,
             "block_size_mm": 25.0,
             "min_angular_separation_deg": 8.0,
             "charset": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         },
         "writing_line": {
-            "start_xyz": [300.0, -200.0, 50.0],
-            "direction": [1.0, 0.0, 0.0],
-            "spacing_mm": 30.0,
+            "radius_mm": 300.0,
+            "center_angle_deg": -25.0,
+            "angular_spacing_deg": 4.0,
+            "height_mm": 50.0,
         },
         "robot": {
-            "safe_height_mm": 150.0,
-            "approach_angle_deg": -90.0,
+            "safe_height_mm": 75.0,
+            "approach_angle_deg": -70.0,
             "gripper_open_mm": 40.0,
             "home_position_xyz": [456.0, 0.0, 189.0],
         },

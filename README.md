@@ -145,6 +145,16 @@ Udec_Robotic_Writer/
 
 ---
 
+## Frontend
+
+![Frontend](docs/png/frontend.png)
+
+<video src="docs/videos/Working_Sim.mp4" controls width="100%"></video>
+
+### Video Demo
+
+[![Robotic Writer — YouTube Demo](https://img.youtube.com/vi/ubUdNsb0W-o/0.jpg)](https://youtu.be/ubUdNsb0W-o)
+
 ## Getting Started
 
 ### Prerequisites
