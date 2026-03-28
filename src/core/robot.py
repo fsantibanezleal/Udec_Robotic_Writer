@@ -104,6 +104,61 @@ class ScorbotIII:
             # Has zero velocity at endpoints (C1 continuity)
             return 3*t**2 - 2*t**3
 
+    @staticmethod
+    def _trapezoidal_profile(t: float, t_total: float, v_max: float = 1.0,
+                              a_max: float = 2.0) -> float:
+        """Trapezoidal velocity profile with constrained v_max and a_max.
+
+        Three phases:
+        1. Acceleration: constant a_max until v_max reached
+        2. Cruise: constant v_max
+        3. Deceleration: constant -a_max until stop
+
+        Returns normalized position s(t) in [0, 1].
+
+        Args:
+            t: Current time.
+            t_total: Total motion duration.
+            v_max: Maximum velocity.
+            a_max: Maximum acceleration.
+
+        Returns:
+            Normalized position in [0, 1].
+        """
+        t_accel = v_max / a_max
+
+        if 2 * t_accel > t_total:
+            # Triangle profile (can't reach v_max)
+            t_accel = t_total / 2
+            v_peak = a_max * t_accel
+        else:
+            v_peak = v_max
+
+        t_decel_start = t_total - t_accel
+
+        if t <= 0:
+            s = 0.0
+        elif t >= t_total:
+            s_total = (0.5 * a_max * t_accel**2
+                       + v_peak * (t_decel_start - t_accel)
+                       + 0.5 * v_peak * t_accel)
+            return 1.0
+        elif t <= t_accel:
+            s = 0.5 * a_max * t**2
+        elif t <= t_decel_start:
+            s = 0.5 * a_max * t_accel**2 + v_peak * (t - t_accel)
+        else:
+            dt = t - t_decel_start
+            s = (0.5 * a_max * t_accel**2
+                 + v_peak * (t_decel_start - t_accel)
+                 + v_peak * dt - 0.5 * a_max * dt**2)
+
+        # Normalize to [0, 1]
+        total_dist = (0.5 * a_max * t_accel**2
+                      + v_peak * (t_decel_start - t_accel)
+                      + 0.5 * v_peak * t_accel)
+        return float(np.clip(s / (total_dist + 1e-10), 0, 1))
+
     @property
     def end_effector_position(self) -> np.ndarray:
         """Current end-effector XYZ position in mm."""

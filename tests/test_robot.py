@@ -99,6 +99,45 @@ class TestInterpolation:
         assert cubic_mid != quintic_mid, "Cubic and quintic should differ at t=0.3"
 
 
+class TestTrapezoidalProfile:
+    def test_endpoints(self):
+        """Trapezoidal profile should map t=0 -> 0 and t=t_total -> 1."""
+        s0 = ScorbotIII._trapezoidal_profile(0.0, t_total=2.0)
+        s1 = ScorbotIII._trapezoidal_profile(2.0, t_total=2.0)
+        assert abs(s0) < 1e-10, f"s(0) should be 0, got {s0}"
+        assert abs(s1 - 1.0) < 1e-10, f"s(t_total) should be 1, got {s1}"
+
+    def test_monotonic(self):
+        """Trapezoidal profile should be monotonically increasing."""
+        t_total = 3.0
+        t_values = np.linspace(0, t_total, 200)
+        s_values = [ScorbotIII._trapezoidal_profile(t, t_total) for t in t_values]
+        for i in range(1, len(s_values)):
+            assert s_values[i] >= s_values[i-1] - 1e-12, \
+                f"Not monotonic at t={t_values[i]}: {s_values[i]} < {s_values[i-1]}"
+
+    def test_bounded_zero_one(self):
+        """Profile values should stay in [0, 1]."""
+        t_total = 2.0
+        for t in np.linspace(0, t_total, 100):
+            s = ScorbotIII._trapezoidal_profile(t, t_total)
+            assert -1e-10 <= s <= 1.0 + 1e-10, f"s({t}) = {s} is out of [0, 1]"
+
+    def test_triangle_profile(self):
+        """Short duration should produce a triangle profile (no cruise phase)."""
+        # v_max=1.0, a_max=2.0 -> t_accel=0.5. With t_total=0.5, 2*t_accel > t_total
+        s_mid = ScorbotIII._trapezoidal_profile(0.25, t_total=0.5, v_max=1.0, a_max=2.0)
+        assert 0.0 < s_mid < 1.0, f"Mid-point should be between 0 and 1, got {s_mid}"
+        s_end = ScorbotIII._trapezoidal_profile(0.5, t_total=0.5, v_max=1.0, a_max=2.0)
+        assert abs(s_end - 1.0) < 1e-10, f"End should be 1.0, got {s_end}"
+
+    def test_symmetric_midpoint(self):
+        """Profile at midpoint should be approximately 0.5 for symmetric trapezoidal."""
+        t_total = 4.0
+        s_mid = ScorbotIII._trapezoidal_profile(t_total / 2, t_total, v_max=1.0, a_max=2.0)
+        assert abs(s_mid - 0.5) < 0.1, f"Midpoint should be ~0.5, got {s_mid}"
+
+
 class TestBlockCircle:
     def test_default_has_26_blocks(self):
         """Default block circle should contain 26 letter blocks (A-Z)."""
