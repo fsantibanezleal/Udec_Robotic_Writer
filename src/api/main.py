@@ -17,9 +17,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from ..core.kinematics import ForwardKinematics, InverseKinematics, JointState
+from ..core.kinematics import ForwardKinematics, InverseKinematics, JointState, JOINT_LIMITS_DEG
 from ..core.robot import ScorbotIII
 from ..core.writer import RoboticWriter, BlockCircle, WritingLine
+from ..core.rrt_planner import RRTPlanner
 
 
 # ── Pydantic models ────────────────────────────────────────────────────────
@@ -384,6 +385,58 @@ async def trajectory_frames(
         }
     except Exception as e:
         raise HTTPException(500, detail=str(e))
+
+
+class RRTPlanRequest(BaseModel):
+    """Request for RRT path planning."""
+    start_deg: list[float] = Field(..., min_length=5, max_length=5)
+    goal_deg: list[float] = Field(..., min_length=5, max_length=5)
+    step_size: float = Field(5.0, ge=1.0, le=30.0)
+    max_iterations: int = Field(1000, ge=100, le=10000)
+    goal_threshold: float = Field(3.0, ge=0.5, le=20.0)
+    smooth: bool = True
+
+
+@app.post("/api/rrt-plan")
+async def rrt_plan(req: RRTPlanRequest):
+    """Plan a collision-free path in joint space using RRT.
+
+    Returns a list of joint configurations (degrees) from start to goal
+    that respect joint limits. Optionally smooths the path.
+    """
+    joint_limits = np.array(JOINT_LIMITS_DEG)
+    planner = RRTPlanner(
+        joint_limits=joint_limits,
+        step_size=req.step_size,
+        max_iterations=req.max_iterations,
+        goal_threshold=req.goal_threshold,
+    )
+
+    start = np.array(req.start_deg)
+    goal = np.array(req.goal_deg)
+
+    # Validate start and goal are within limits
+    if not planner._within_limits(start):
+        raise HTTPException(400, detail="Start configuration violates joint limits")
+    if not planner._within_limits(goal):
+        raise HTTPException(400, detail="Goal configuration violates joint limits")
+
+    path = planner.plan(start, goal, seed=42)
+    if path is None:
+        raise HTTPException(
+            404,
+            detail="RRT failed to find a path within the iteration limit",
+        )
+
+    if req.smooth:
+        path = planner.smooth_path(path, seed=42)
+
+    return {
+        "path": [p.tolist() for p in path],
+        "num_waypoints": len(path),
+        "start_deg": req.start_deg,
+        "goal_deg": req.goal_deg,
+    }
 
 
 @app.get("/api/health")
