@@ -63,21 +63,101 @@ class ScorbotIII:
 
     HOME_POSITION_XYZ = np.array([456.0, 0.0, 189.0])
 
-    def __init__(self, interpolation_steps: int = 50, speed_factor: float = 1.0):
+    def __init__(self, interpolation_steps: int = 50, speed_factor: float = 1.0,
+                 interpolation_order: int = 3):
         """Initialize the robot at home position.
 
         Args:
             interpolation_steps: Number of intermediate points for trajectory generation.
             speed_factor: Multiplier for simulated motion speed (1.0 = real-time).
+            interpolation_order: Polynomial order for trajectory smoothing.
+                3 = cubic smoothstep (C1 continuity, zero velocity at endpoints).
+                5 = quintic smoothstep (C2 continuity, zero velocity AND acceleration).
         """
         self.fk = ForwardKinematics()
         self.ik = InverseKinematics()
         self.interpolation_steps = interpolation_steps
         self.speed_factor = speed_factor
+        self.interpolation_order = interpolation_order
 
         self.joint_state = JointState()
         self.status = MotionStatus.IDLE
         self.trajectory_log: list[MotionStep] = []
+
+    @staticmethod
+    def _smoothstep(t: float, order: int = 3) -> float:
+        """Polynomial smoothstep interpolation.
+
+        Args:
+            t: Normalized time in [0, 1].
+            order: 3 for cubic (C1), 5 for quintic (C2).
+
+        Returns:
+            Blended value in [0, 1] with zero derivatives at endpoints.
+        """
+        if order == 5:
+            # Quintic smoothstep: 6t^5 - 15t^4 + 10t^3
+            # Has zero velocity AND acceleration at endpoints (C2 continuity)
+            return 6*t**5 - 15*t**4 + 10*t**3
+        else:
+            # Cubic smoothstep: 3t^2 - 2t^3
+            # Has zero velocity at endpoints (C1 continuity)
+            return 3*t**2 - 2*t**3
+
+    @staticmethod
+    def _trapezoidal_profile(t: float, t_total: float, v_max: float = 1.0,
+                              a_max: float = 2.0) -> float:
+        """Trapezoidal velocity profile with constrained v_max and a_max.
+
+        Three phases:
+        1. Acceleration: constant a_max until v_max reached
+        2. Cruise: constant v_max
+        3. Deceleration: constant -a_max until stop
+
+        Returns normalized position s(t) in [0, 1].
+
+        Args:
+            t: Current time.
+            t_total: Total motion duration.
+            v_max: Maximum velocity.
+            a_max: Maximum acceleration.
+
+        Returns:
+            Normalized position in [0, 1].
+        """
+        t_accel = v_max / a_max
+
+        if 2 * t_accel > t_total:
+            # Triangle profile (can't reach v_max)
+            t_accel = t_total / 2
+            v_peak = a_max * t_accel
+        else:
+            v_peak = v_max
+
+        t_decel_start = t_total - t_accel
+
+        if t <= 0:
+            s = 0.0
+        elif t >= t_total:
+            s_total = (0.5 * a_max * t_accel**2
+                       + v_peak * (t_decel_start - t_accel)
+                       + 0.5 * v_peak * t_accel)
+            return 1.0
+        elif t <= t_accel:
+            s = 0.5 * a_max * t**2
+        elif t <= t_decel_start:
+            s = 0.5 * a_max * t_accel**2 + v_peak * (t - t_accel)
+        else:
+            dt = t - t_decel_start
+            s = (0.5 * a_max * t_accel**2
+                 + v_peak * (t_decel_start - t_accel)
+                 + v_peak * dt - 0.5 * a_max * dt**2)
+
+        # Normalize to [0, 1]
+        total_dist = (0.5 * a_max * t_accel**2
+                      + v_peak * (t_decel_start - t_accel)
+                      + 0.5 * v_peak * t_accel)
+        return float(np.clip(s / (total_dist + 1e-10), 0, 1))
 
     @property
     def end_effector_position(self) -> np.ndarray:
@@ -110,8 +190,8 @@ class ScorbotIII:
 
         for i in range(self.interpolation_steps + 1):
             t = i / self.interpolation_steps
-            # Smooth interpolation (cubic ease in-out)
-            t_smooth = 3 * t**2 - 2 * t**3
+            # Smooth interpolation (cubic or quintic ease in-out)
+            t_smooth = self._smoothstep(t, self.interpolation_order)
 
             angles = start_angles + t_smooth * (end_angles - start_angles)
             gripper = start_gripper + t_smooth * (end_gripper - start_gripper)

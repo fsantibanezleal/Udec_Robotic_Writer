@@ -111,3 +111,48 @@ async def test_hardware_status_disconnected(client):
     assert response.status_code == 200
     data = response.json()
     assert data["connected"] is False
+
+
+@pytest.mark.asyncio
+async def test_trajectory_frames_default(client):
+    """GET /api/trajectory-frames should return animation frames."""
+    response = await client.get("/api/trajectory-frames", params={"text": "HI"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["text"] == "HI"
+    assert data["total_steps"] > 0
+    assert data["n_frames"] > 0
+    assert len(data["frames"]) == data["n_frames"]
+
+    # Verify frame structure
+    frame = data["frames"][0]
+    assert "joint_angles_deg" in frame
+    assert len(frame["joint_angles_deg"]) == 5
+    assert "joint_positions" in frame
+    assert "end_effector" in frame
+    assert "x" in frame["end_effector"]
+    assert "gripper_mm" in frame
+    assert "timestamp" in frame
+
+
+@pytest.mark.asyncio
+async def test_trajectory_frames_with_step(client):
+    """GET /api/trajectory-frames with frame_step should subsample."""
+    response_all = await client.get(
+        "/api/trajectory-frames", params={"text": "A", "frame_step": 1}
+    )
+    response_skip = await client.get(
+        "/api/trajectory-frames", params={"text": "A", "frame_step": 10}
+    )
+    assert response_all.status_code == 200
+    assert response_skip.status_code == 200
+    n_all = response_all.json()["n_frames"]
+    n_skip = response_skip.json()["n_frames"]
+    assert n_skip <= n_all, "Subsampled frames should be fewer or equal"
+
+
+@pytest.mark.asyncio
+async def test_trajectory_frames_empty_text(client):
+    """GET /api/trajectory-frames with empty text should fail."""
+    response = await client.get("/api/trajectory-frames", params={"text": ""})
+    assert response.status_code == 400
