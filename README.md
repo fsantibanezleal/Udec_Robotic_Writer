@@ -8,6 +8,20 @@
 
 Robotic handwriting requires a 5-DOF arm to plan collision-free trajectories for writing text. The challenge involves inverse kinematics, smooth trajectory planning, and gripper coordination for pen-up/pen-down movements.
 
+![Robot Setup](docs/diagrams/robot_setup.svg)
+
+---
+
+## KPIs & Metrics
+
+| Metric | Target | Current |
+|--------|--------|---------|
+| Kinematics | Analytical IK (no iterative) | 5-DOF closed-form solution |
+| Trajectory | C² continuity option | Cubic (C¹) + quintic (C²) smoothstep |
+| Path planning | Collision-free RRT | 1000-iteration RRT with smoothing |
+| Writing modes | Block + cursive | Block letters + Bezier cursive (26 chars) |
+| Test coverage | Comprehensive | 83 tests passing |
+
 ---
 
 ## The Problem
