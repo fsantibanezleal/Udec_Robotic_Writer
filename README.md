@@ -4,6 +4,12 @@
 
 ---
 
+## Motivation & Problem
+
+Robotic handwriting requires a 5-DOF arm to plan collision-free trajectories for writing text. The challenge involves inverse kinematics, smooth trajectory planning, and gripper coordination for pen-up/pen-down movements.
+
+---
+
 ## The Problem
 
 A **5-DOF Scorbot III robotic arm** sits at the center of a workspace table. Around it, **26 letter blocks** (A–Z) are arranged on a **circular arc** at a fixed radius from the robot base. Each block occupies a unique angular position, separated by a minimum angular gap to allow the gripper to manipulate them without collisions.
@@ -29,6 +35,40 @@ The result is the text spelled out physically in a straight line.
   <img src="docs/diagrams/dh_frames.svg" alt="DH Frames Diagram" width="700"/>
 </p>
 
+### Kinematics
+
+The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
+
+#### DH Parameters
+
+| Joint | Name | α (rad) | d (mm) | a (mm) | θ (variable) |
+|-------|------|---------|--------|--------|---------------|
+| 1 | Base | -π/2 | 340 | 16 | θ₁ |
+| 2 | Shoulder | 0 | 0 | 220 | θ₂ |
+| 3 | Elbow | 0 | 0 | 220 | θ₃ |
+| 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
+| 5 | Roll | 0 | 151 | 0 | θ₅ |
+
+#### Forward Kinematics
+
+```
+T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
+
+End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
+```
+
+#### Inverse Kinematics (Analytical)
+
+```
+θ₁ = atan2(qy, qx)
+θ₃ = arccos((k₁² + k₂² - a₂² - a₃²) / (2·a₂·a₃))
+θ₂ = atan2(sin θ₂, cos θ₂)    (from planar geometry)
+θ₄ = θ₂₃₄ - θ₂ - θ₃
+θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
+```
+
+Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
+
 ---
 
 ## Solution Flow
@@ -50,6 +90,14 @@ The result is the text spelled out physically in a straight line.
 
 ---
 
+## Frontend
+
+![Frontend](docs/png/frontend.png)
+
+<video src="docs/videos/Working_Sim.mp4" controls width="100%"></video>
+
+---
+
 ## System Architecture
 
 <p align="center">
@@ -67,39 +115,85 @@ The result is the text spelled out physically in a straight line.
 
 ---
 
-## Kinematics
+## Demo
 
-The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
+### Video Demo
 
-### DH Parameters
+[![Robotic Writer — YouTube Demo](https://img.youtube.com/vi/ubUdNsb0W-o/0.jpg)](https://youtu.be/ubUdNsb0W-o)
 
-| Joint | Name | α (rad) | d (mm) | a (mm) | θ (variable) |
-|-------|------|---------|--------|--------|---------------|
-| 1 | Base | -π/2 | 340 | 16 | θ₁ |
-| 2 | Shoulder | 0 | 0 | 220 | θ₂ |
-| 3 | Elbow | 0 | 0 | 220 | θ₃ |
-| 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
-| 5 | Roll | 0 | 151 | 0 | θ₅ |
+---
 
-### Forward Kinematics
+## Features
 
+- Type any text and click **Run Simulation** to see the robot write it
+- Use the **Animation** controls to play/pause/seek through the trajectory
+- Switch to the **Kinematics** tab to explore forward kinematics interactively
+- Adjust block circle radius, angular separation, and spacing
+- Multiple hardware backends: MATLAB Engine, Arduino serial, direct Scorbot III serial
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **Python 3.12+**
+- **Git**
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/Udec_Robotic_Writer.git
+cd Udec_Robotic_Writer
+
+# Create and activate virtual environment
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# Linux/macOS
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
-T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
 
-End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
+### Running the Interactive GUI (Simulation)
+
+```bash
+python run_frontend.py
 ```
 
-### Inverse Kinematics (Analytical)
+Then open **http://localhost:8055** in your browser.
 
-```
-θ₁ = atan2(qy, qx)
-θ₃ = arccos((k₁² + k₂² - a₂² - a₃²) / (2·a₂·a₃))
-θ₂ = atan2(sin θ₂, cos θ₂)    (from planar geometry)
-θ₄ = θ₂₃₄ - θ₂ - θ₃
-θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
+### Running the REST API
+
+```bash
+python run_api.py
 ```
 
-Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
+API documentation available at **http://localhost:8005/docs** (Swagger UI).
+
+### Running Both (API + GUI)
+
+Run each in a separate terminal:
+
+```bash
+# Terminal 1: API server
+python run_api.py
+
+# Terminal 2: GUI
+python run_frontend.py
+```
+
+### Running Tests
+
+```bash
+pip install pytest
+pytest tests/ -v
+```
 
 ---
 
@@ -145,64 +239,7 @@ Udec_Robotic_Writer/
 
 ---
 
-## Frontend
-
-![Frontend](docs/png/frontend.png)
-
-<video src="docs/videos/Working_Sim.mp4" controls width="100%"></video>
-
-### Video Demo
-
-[![Robotic Writer — YouTube Demo](https://img.youtube.com/vi/ubUdNsb0W-o/0.jpg)](https://youtu.be/ubUdNsb0W-o)
-
-## Getting Started
-
-### Prerequisites
-
-- **Python 3.12+**
-- **Git**
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/Udec_Robotic_Writer.git
-cd Udec_Robotic_Writer
-
-# Create and activate virtual environment
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# Linux/macOS
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Running the Interactive GUI (Simulation)
-
-```bash
-python run_frontend.py
-```
-
-Then open **http://localhost:8055** in your browser.
-
-**Features:**
-- Type any text and click **Run Simulation** to see the robot write it
-- Use the **Animation** controls to play/pause/seek through the trajectory
-- Switch to the **Kinematics** tab to explore forward kinematics interactively
-- Adjust block circle radius, angular separation, and spacing
-
-### Running the REST API
-
-```bash
-python run_api.py
-```
-
-API documentation available at **http://localhost:8005/docs** (Swagger UI).
+## API Documentation
 
 **Key endpoints:**
 
@@ -215,24 +252,23 @@ API documentation available at **http://localhost:8005/docs** (Swagger UI).
 | POST | `/api/hardware/connect` | Connect to hardware adapter |
 | GET | `/api/health` | Health check |
 
-### Running Both (API + GUI)
+### Port
 
-Run each in a separate terminal:
+**8005** (API) -- http://localhost:8005 | **8055** (GUI) -- http://localhost:8055
 
-```bash
-# Terminal 1: API server
-python run_api.py
+---
 
-# Terminal 2: GUI
-python run_frontend.py
-```
+## Documentation
 
-### Running Tests
-
-```bash
-pip install pytest
-pytest tests/ -v
-```
+| Document | Description |
+|----------|-------------|
+| [Kinematics Equations](docs/equations/kinematics.md) | Complete mathematical derivation of FK/IK |
+| [Methodology](docs/methodology.md) | Problem statement, approach, and system design |
+| [Arduino Firmware](docs/arduino_firmware.md) | Protocol specification and example Arduino sketch |
+| [DH Frames Diagram](docs/diagrams/dh_frames.svg) | Denavit-Hartenberg reference frames |
+| [Setup Diagram](docs/diagrams/robot_setup.svg) | Physical workspace layout |
+| [Flowchart](docs/diagrams/solution_flowchart.svg) | Solution algorithm flow |
+| [Architecture](docs/diagrams/system_architecture.svg) | System component diagram |
 
 ---
 
@@ -282,20 +318,6 @@ adapter.connect(port="COM1", baud=9600)
 adapter.move_motor(1, 500)
 adapter.disconnect()
 ```
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Kinematics Equations](docs/equations/kinematics.md) | Complete mathematical derivation of FK/IK |
-| [Methodology](docs/methodology.md) | Problem statement, approach, and system design |
-| [Arduino Firmware](docs/arduino_firmware.md) | Protocol specification and example Arduino sketch |
-| [DH Frames Diagram](docs/diagrams/dh_frames.svg) | Denavit-Hartenberg reference frames |
-| [Setup Diagram](docs/diagrams/robot_setup.svg) | Physical workspace layout |
-| [Flowchart](docs/diagrams/solution_flowchart.svg) | Solution algorithm flow |
-| [Architecture](docs/diagrams/system_architecture.svg) | System component diagram |
 
 ---
 
