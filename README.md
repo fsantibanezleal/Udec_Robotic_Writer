@@ -12,15 +12,24 @@ Robotic handwriting requires a 5-DOF arm to plan collision-free trajectories for
 
 ---
 
-## KPIs & Metrics
+## KPIs — Impact & Value
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Kinematics | Analytical IK (no iterative) | 5-DOF closed-form solution |
-| Trajectory | C² continuity option | Cubic (C¹) + quintic (C²) smoothstep |
-| Path planning | Collision-free RRT | 1000-iteration RRT with smoothing |
-| Writing modes | Block + cursive | Block letters + Bezier cursive (26 chars) |
-| Test coverage | Comprehensive | 83 tests passing |
+| KPI | Impact |
+|-----|--------|
+| Educational tool | Hands-on robotics learning without physical Scorbot hardware |
+| Simulation fidelity | Full 5-DOF kinematics matching real robot behavior |
+| Multi-backend | Same code drives simulation, Arduino steppers, or real Scorbot |
+| Writing modes | Block letters + cursive Bezier — demonstrates trajectory planning |
+
+## Project Metrics & Status
+
+| Metric | Status |
+|--------|--------|
+| Tests | 83 passing |
+| Kinematics | Analytical IK (closed-form, no iteration) |
+| Trajectory | Cubic (C¹) + quintic (C²) smoothstep |
+| Path planning | RRT with 1000-iteration limit + smoothing |
+| Writing | Block (26 chars) + cursive Bezier (26 chars) |
 
 ---
 
