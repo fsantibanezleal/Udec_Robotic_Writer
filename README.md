@@ -63,7 +63,8 @@ The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
 | 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
 | 5 | Roll | 0 | 151 | 0 | θ₅ |
 
-#### Forward Kinematics
+#### Forward Kinematics — Joint Angles to End-Effector Position
+The forward kinematic chain computes the gripper position and orientation from all five joint angles by cascading DH transformation matrices:
 
 ```
 T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
@@ -71,7 +72,10 @@ T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
 End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
 ```
 
-#### Inverse Kinematics (Analytical)
+Each **Aᵢ** is a 4x4 homogeneous transformation encoding the rotation and translation of joint i relative to joint i-1, parameterized by the DH values (α, d, a, θ) in the table above. The last column of **T₀₅** gives the Cartesian position of the gripper tip in the base frame.
+
+#### Inverse Kinematics — Target Position to Joint Angles
+Given a desired gripper position (qx, qy, qz) and approach direction, the analytical IK solution recovers joint angles without iterative solvers:
 
 ```
 θ₁ = atan2(qy, qx)
@@ -81,7 +85,7 @@ End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
 θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
 ```
 
-Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
+where **θ₁** is the base rotation (azimuth to target), **θ₃** uses the law of cosines with link lengths **a₂ = a₃ = 220 mm**, and **k₁, k₂** are the radial and vertical offsets from the shoulder. The elbow-up/down ambiguity in θ₃ is resolved by choosing the solution that avoids table collision. Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
 
 ---
 
