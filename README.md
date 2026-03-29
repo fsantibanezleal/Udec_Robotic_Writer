@@ -21,18 +21,6 @@ Robotic handwriting requires a 5-DOF arm to plan collision-free trajectories for
 | Multi-backend | Same code drives simulation, Arduino steppers, or real Scorbot |
 | Writing modes | Block letters + cursive Bezier — demonstrates trajectory planning |
 
-## Project Metrics & Status
-
-| Metric | Status |
-|--------|--------|
-| Tests | 83 passing |
-| Kinematics | Analytical IK (closed-form, no iteration) |
-| Trajectory | Cubic (C¹) + quintic (C²) smoothstep |
-| Path planning | RRT with 1000-iteration limit + smoothing |
-| Writing | Block (26 chars) + cursive Bezier (26 chars) |
-
----
-
 ## The Problem
 
 A **5-DOF Scorbot III robotic arm** sits at the center of a workspace table. Around it, **26 letter blocks** (A–Z) are arranged on a **circular arc** at a fixed radius from the robot base. Each block occupies a unique angular position, separated by a minimum angular gap to allow the gripper to manipulate them without collisions.
@@ -57,44 +45,6 @@ The result is the text spelled out physically in a straight line.
 <p align="center">
   <img src="docs/diagrams/dh_frames.svg" alt="DH Frames Diagram" width="700"/>
 </p>
-
-### Kinematics
-
-The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
-
-#### DH Parameters
-
-| Joint | Name | α (rad) | d (mm) | a (mm) | θ (variable) |
-|-------|------|---------|--------|--------|---------------|
-| 1 | Base | -π/2 | 340 | 16 | θ₁ |
-| 2 | Shoulder | 0 | 0 | 220 | θ₂ |
-| 3 | Elbow | 0 | 0 | 220 | θ₃ |
-| 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
-| 5 | Roll | 0 | 151 | 0 | θ₅ |
-
-#### Forward Kinematics — Joint Angles to End-Effector Position
-The forward kinematic chain computes the gripper position and orientation from all five joint angles by cascading DH transformation matrices:
-
-```
-T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
-
-End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
-```
-
-Each **Aᵢ** is a 4x4 homogeneous transformation encoding the rotation and translation of joint i relative to joint i-1, parameterized by the DH values (α, d, a, θ) in the table above. The last column of **T₀₅** gives the Cartesian position of the gripper tip in the base frame.
-
-#### Inverse Kinematics — Target Position to Joint Angles
-Given a desired gripper position (qx, qy, qz) and approach direction, the analytical IK solution recovers joint angles without iterative solvers:
-
-```
-θ₁ = atan2(qy, qx)
-θ₃ = arccos((k₁² + k₂² - a₂² - a₃²) / (2·a₂·a₃))
-θ₂ = atan2(sin θ₂, cos θ₂)    (from planar geometry)
-θ₄ = θ₂₃₄ - θ₂ - θ₃
-θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
-```
-
-where **θ₁** is the base rotation (azimuth to target), **θ₃** uses the law of cosines with link lengths **a₂ = a₃ = 220 mm**, and **k₁, k₂** are the radial and vertical offsets from the shoulder. The elbow-up/down ambiguity in θ₃ is resolved by choosing the solution that avoids table collision. Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
 
 ---
 
@@ -122,6 +72,46 @@ where **θ₁** is the base rotation (azimuth to target), **θ₃** uses the law
 ![Frontend](docs/png/frontend.png)
 
 <video src="docs/videos/Working_Sim.mp4" controls width="100%"></video>
+
+---
+
+## Technical Approach — Kinematics & Trajectory
+
+The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
+
+### DH Parameters
+
+| Joint | Name | α (rad) | d (mm) | a (mm) | θ (variable) |
+|-------|------|---------|--------|--------|---------------|
+| 1 | Base | -π/2 | 340 | 16 | θ₁ |
+| 2 | Shoulder | 0 | 0 | 220 | θ₂ |
+| 3 | Elbow | 0 | 0 | 220 | θ₃ |
+| 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
+| 5 | Roll | 0 | 151 | 0 | θ₅ |
+
+### Forward Kinematics — Joint Angles to End-Effector Position
+The forward kinematic chain computes the gripper position and orientation from all five joint angles by cascading DH transformation matrices:
+
+```
+T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
+
+End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
+```
+
+Each **Aᵢ** is a 4x4 homogeneous transformation encoding the rotation and translation of joint i relative to joint i-1, parameterized by the DH values (α, d, a, θ) in the table above. The last column of **T₀₅** gives the Cartesian position of the gripper tip in the base frame.
+
+### Inverse Kinematics — Target Position to Joint Angles
+Given a desired gripper position (qx, qy, qz) and approach direction, the analytical IK solution recovers joint angles without iterative solvers:
+
+```
+θ₁ = atan2(qy, qx)
+θ₃ = arccos((k₁² + k₂² - a₂² - a₃²) / (2·a₂·a₃))
+θ₂ = atan2(sin θ₂, cos θ₂)    (from planar geometry)
+θ₄ = θ₂₃₄ - θ₂ - θ₃
+θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
+```
+
+where **θ₁** is the base rotation (azimuth to target), **θ₃** uses the law of cosines with link lengths **a₂ = a₃ = 220 mm**, and **k₁, k₂** are the radial and vertical offsets from the shoulder. The elbow-up/down ambiguity in θ₃ is resolved by choosing the solution that avoids table collision. Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
 
 ---
 
@@ -157,6 +147,16 @@ where **θ₁** is the base rotation (azimuth to target), **θ₃** uses the law
 - Switch to the **Kinematics** tab to explore forward kinematics interactively
 - Adjust block circle radius, angular separation, and spacing
 - Multiple hardware backends: MATLAB Engine, Arduino serial, direct Scorbot III serial
+
+## Project Metrics & Status
+
+| Metric | Status |
+|--------|--------|
+| Tests | 83 passing |
+| Kinematics | Analytical IK (closed-form, no iteration) |
+| Trajectory | Cubic (C¹) + quintic (C²) smoothstep |
+| Path planning | RRT with 1000-iteration limit + smoothing |
+| Writing | Block (26 chars) + cursive Bezier (26 chars) |
 
 ---
 
