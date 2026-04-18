@@ -289,13 +289,17 @@ Udec_Robotic_Writer/
 
 | Document | Description |
 |----------|-------------|
-| [Kinematics Equations](docs/equations/kinematics.md) | Complete mathematical derivation of FK/IK |
+| [User Guide](docs/user_guide.md) | Install, GUI tour, API curl example, hardware backends, troubleshooting |
+| [Architecture](docs/architecture.md) | Layered view, request lifecycle, module responsibilities, extension points |
 | [Methodology](docs/methodology.md) | Problem statement, approach, and system design |
+| [Kinematics Equations](docs/equations/kinematics.md) | Complete mathematical derivation of FK/IK |
 | [Arduino Firmware](docs/arduino_firmware.md) | Protocol specification and example Arduino sketch |
+| [Development History](docs/development_history.md) | Reverse-chronological change log |
+| [References](docs/references.md) | External bibliography (Craig, Spong, LaValle, ...) |
 | [DH Frames Diagram](docs/diagrams/dh_frames.svg) | Denavit-Hartenberg reference frames |
 | [Setup Diagram](docs/diagrams/robot_setup.svg) | Physical workspace layout |
 | [Flowchart](docs/diagrams/solution_flowchart.svg) | Solution algorithm flow |
-| [Architecture](docs/diagrams/system_architecture.svg) | System component diagram |
+| [Architecture SVG](docs/diagrams/system_architecture.svg) | System component diagram |
 
 ---
 
