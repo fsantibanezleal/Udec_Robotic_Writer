@@ -1,6 +1,20 @@
-# Methodology History
+# Development History
 
 Reverse-chronological log of design decisions, changes, equations, and improvements applied to the Robotic Writer project. Most recent changes appear first.
+
+> Previously titled *Methodology History* — renamed to match the repo-wide convention (`docs/development_history.md`).
+
+---
+
+## v2.8 — Docs Quality Pass (2026-04-18)
+
+Heavy-cycle docs audit. Added:
+
+- [architecture.md](architecture.md) — layered view, request lifecycle for `POST /api/writer/simulate`, module responsibilities, extension points, test strategy.
+- [references.md](references.md) — curated bibliography (Craig, Spong, LaValle, Scorbot manual, FastAPI/Dash, de Casteljau).
+- [user_guide.md](user_guide.md) — install, GUI tour, API curl example, hardware backends, troubleshooting table.
+
+Also renamed `docs/Methodology_history.md` → `docs/development_history.md` to match the project-quality-standards naming convention. Private-data sweep: clean (all grep hits were benign localhost / COM-port examples; the string `"A SECRET"` in `src/core/modes.py` is a test phrase, not a credential). Deployment note moved/created at `CAOS_MANAGE/deployments/robotic-writer.md`.
 
 ---
 
