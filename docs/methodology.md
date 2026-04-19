@@ -38,6 +38,10 @@ For each character, the robot executes a 9-step sequence:
 | 8 | Open gripper | Release the block |
 | 9 | Lift | Raise to safe height, ready for next cycle |
 
+The timeline view below renders the same 9 events grouped into **pick**, **transit**, and **place** phases, with event markers on a common time axis:
+
+![Pick-and-Place Pipeline Timeline](diagrams/pipeline.svg)
+
 ### 2.3 Trajectory Planning
 
 - **Joint-space interpolation**: Smooth cubic ease-in/ease-out between configurations.
