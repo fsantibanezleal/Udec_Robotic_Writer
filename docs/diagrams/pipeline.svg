@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arrowP" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <linearGradient id="pickFill" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fcd34d"/>
+    </linearGradient>
+    <linearGradient id="transitFill" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <linearGradient id="placeFill" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#bbf7d0"/>
+      <stop offset="100%" stop-color="#86efac"/>
+    </linearGradient>
+  </defs>
+
+  <text x="550" y="34" text-anchor="middle" font-size="20" font-weight="bold" fill="#222">
+    Pick-and-Place Pipeline - 9-Step Timeline per Character
+  </text>
+  <text x="550" y="56" text-anchor="middle" font-size="13" fill="#555">
+    Executed once per letter in the input string, orchestrated by src/core/writer.py RoboticWriter
+  </text>
+
+  <!-- Phase band labels -->
+  <rect x="40"  y="80" width="340" height="22" fill="url(#pickFill)"    stroke="#b45309" stroke-width="1"/>
+  <rect x="380" y="80" width="220" height="22" fill="url(#transitFill)" stroke="#0369a1" stroke-width="1"/>
+  <rect x="600" y="80" width="460" height="22" fill="url(#placeFill)"   stroke="#15803d" stroke-width="1"/>
+  <text x="210" y="96"  text-anchor="middle" font-size="13" font-weight="bold" fill="#78350f">PICK phase</text>
+  <text x="490" y="96"  text-anchor="middle" font-size="13" font-weight="bold" fill="#075985">TRANSIT</text>
+  <text x="830" y="96"  text-anchor="middle" font-size="13" font-weight="bold" fill="#14532d">PLACE phase</text>
+
+  <!-- Timeline axis -->
+  <line x1="60" y1="430" x2="1060" y2="430" stroke="#555" stroke-width="2" marker-end="url(#arrowP)"/>
+  <text x="60"   y="455" font-size="11" fill="#555">t = 0</text>
+  <text x="1045" y="455" font-size="11" fill="#555" text-anchor="end">t = T_cycle</text>
+  <text x="560"  y="475" text-anchor="middle" font-size="12" font-style="italic" fill="#555">
+    Time (joint-space trajectories interpolated with cubic ease-in/ease-out)
+  </text>
+
+  <!-- STEP BOXES: 9 equally spaced markers -->
+  <!-- Step 1: Open gripper -->
+  <g>
+    <rect x="70" y="120" width="95" height="90" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+    <text x="117" y="140" text-anchor="middle" font-size="12" font-weight="bold" fill="#78350f">1. OPEN</text>
+    <text x="117" y="156" text-anchor="middle" font-size="11" fill="#78350f">gripper</text>
+    <!-- mini stick robot: open gripper -->
+    <circle cx="117" cy="185" r="3" fill="#78350f"/>
+    <line x1="117" y1="188" x2="117" y2="200" stroke="#78350f" stroke-width="1.5"/>
+    <line x1="110" y1="175" x2="124" y2="175" stroke="#78350f" stroke-width="1.5"/>
+    <line x1="110" y1="175" x2="107" y2="170" stroke="#78350f" stroke-width="1.5"/>
+    <line x1="124" y1="175" x2="127" y2="170" stroke="#78350f" stroke-width="1.5"/>
+    <circle cx="117" cy="430" r="5" fill="#b45309"/>
+    <line x1="117" y1="210" x2="117" y2="425" stroke="#b45309" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 2: Move above block -->
+  <g>
+    <rect x="175" y="120" width="95" height="90" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+    <text x="222" y="140" text-anchor="middle" font-size="12" font-weight="bold" fill="#78350f">2. APPROACH</text>
+    <text x="222" y="156" text-anchor="middle" font-size="10" fill="#78350f">above block</text>
+    <text x="222" y="170" text-anchor="middle" font-size="9"  fill="#78350f">(safe z=150)</text>
+    <circle cx="222" cy="188" r="3" fill="#78350f"/>
+    <line x1="222" y1="191" x2="222" y2="200" stroke="#78350f" stroke-width="1.5"/>
+    <rect x="215" y="200" width="14" height="5" fill="#78350f"/>
+    <circle cx="222" cy="430" r="5" fill="#b45309"/>
+    <line x1="222" y1="210" x2="222" y2="425" stroke="#b45309" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 3: Lower -->
+  <g>
+    <rect x="280" y="120" width="95" height="90" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+    <text x="327" y="140" text-anchor="middle" font-size="12" font-weight="bold" fill="#78350f">3. LOWER</text>
+    <text x="327" y="156" text-anchor="middle" font-size="10" fill="#78350f">to block</text>
+    <circle cx="327" cy="175" r="3" fill="#78350f"/>
+    <line x1="327" y1="178" x2="327" y2="195" stroke="#78350f" stroke-width="1.5"/>
+    <rect x="320" y="195" width="14" height="5" fill="#78350f"/>
+    <line x1="320" y1="205" x2="334" y2="205" stroke="#b45309" stroke-width="2"/>
+    <circle cx="327" cy="430" r="5" fill="#b45309"/>
+    <line x1="327" y1="210" x2="327" y2="425" stroke="#b45309" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 4: Close gripper -->
+  <g>
+    <rect x="70" y="230" width="95" height="90" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+    <text x="117" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#78350f">4. CLOSE</text>
+    <text x="117" y="266" text-anchor="middle" font-size="11" fill="#78350f">gripper</text>
+    <text x="117" y="280" text-anchor="middle" font-size="9"  fill="#78350f">grasp block</text>
+    <circle cx="117" cy="295" r="3" fill="#78350f"/>
+    <line x1="117" y1="298" x2="117" y2="308" stroke="#78350f" stroke-width="1.5"/>
+    <rect x="111" y="308" width="12" height="6" fill="#b45309"/>
+    <circle cx="117" cy="430" r="5" fill="#b45309"/>
+    <line x1="117" y1="320" x2="117" y2="425" stroke="#b45309" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 5: Lift with block -->
+  <g>
+    <rect x="175" y="230" width="95" height="90" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+    <text x="222" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#78350f">5. LIFT</text>
+    <text x="222" y="266" text-anchor="middle" font-size="10" fill="#78350f">with block</text>
+    <circle cx="222" cy="290" r="3" fill="#78350f"/>
+    <line x1="222" y1="293" x2="222" y2="303" stroke="#78350f" stroke-width="1.5"/>
+    <rect x="216" y="303" width="12" height="6" fill="#b45309"/>
+    <line x1="216" y1="313" x2="228" y2="313" stroke="#78350f"/>
+    <circle cx="222" cy="430" r="5" fill="#b45309"/>
+    <line x1="222" y1="320" x2="222" y2="425" stroke="#b45309" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 6: Move above slot -->
+  <g>
+    <rect x="380" y="230" width="210" height="90" rx="8" fill="#e0f2fe" stroke="#0369a1" stroke-width="1.5"/>
+    <text x="485" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#075985">6. TRANSIT to slot</text>
+    <text x="485" y="268" text-anchor="middle" font-size="10" fill="#075985">joint-space, safe z=150 mm</text>
+    <text x="485" y="283" text-anchor="middle" font-size="10" fill="#075985">RRT if obstacles present</text>
+    <circle cx="420" cy="302" r="3" fill="#075985"/>
+    <line x1="420" y1="305" x2="420" y2="315" stroke="#075985" stroke-width="1.5"/>
+    <rect x="414" y="315" width="12" height="6" fill="#0369a1"/>
+    <path d="M 430 310 Q 485 285 545 310" stroke="#0369a1" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrowP)"/>
+    <circle cx="555" cy="302" r="3" fill="#075985" opacity="0.4"/>
+    <line x1="555" y1="305" x2="555" y2="315" stroke="#075985" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="485" cy="430" r="5" fill="#0369a1"/>
+    <line x1="485" y1="320" x2="485" y2="425" stroke="#0369a1" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 7: Lower to slot -->
+  <g>
+    <rect x="600" y="230" width="95" height="90" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <text x="647" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#14532d">7. LOWER</text>
+    <text x="647" y="266" text-anchor="middle" font-size="10" fill="#14532d">to slot</text>
+    <circle cx="647" cy="285" r="3" fill="#14532d"/>
+    <line x1="647" y1="288" x2="647" y2="300" stroke="#14532d" stroke-width="1.5"/>
+    <rect x="641" y="300" width="12" height="6" fill="#15803d"/>
+    <line x1="641" y1="310" x2="653" y2="310" stroke="#14532d" stroke-width="2"/>
+    <circle cx="647" cy="430" r="5" fill="#15803d"/>
+    <line x1="647" y1="320" x2="647" y2="425" stroke="#15803d" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 8: Open gripper (release) -->
+  <g>
+    <rect x="705" y="230" width="95" height="90" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <text x="752" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#14532d">8. OPEN</text>
+    <text x="752" y="266" text-anchor="middle" font-size="10" fill="#14532d">release block</text>
+    <circle cx="752" cy="285" r="3" fill="#14532d"/>
+    <line x1="752" y1="288" x2="752" y2="300" stroke="#14532d" stroke-width="1.5"/>
+    <line x1="745" y1="305" x2="759" y2="305" stroke="#14532d" stroke-width="1.5"/>
+    <line x1="745" y1="305" x2="742" y2="310" stroke="#14532d" stroke-width="1.5"/>
+    <line x1="759" y1="305" x2="762" y2="310" stroke="#14532d" stroke-width="1.5"/>
+    <rect x="748" y="310" width="8" height="8" fill="#15803d"/>
+    <circle cx="752" cy="430" r="5" fill="#15803d"/>
+    <line x1="752" y1="320" x2="752" y2="425" stroke="#15803d" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Step 9: Lift / return home -->
+  <g>
+    <rect x="810" y="230" width="95" height="90" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <text x="857" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#14532d">9. LIFT</text>
+    <text x="857" y="266" text-anchor="middle" font-size="10" fill="#14532d">ready next</text>
+    <circle cx="857" cy="280" r="3" fill="#14532d"/>
+    <line x1="857" y1="283" x2="857" y2="295" stroke="#14532d" stroke-width="1.5"/>
+    <rect x="852" y="310" width="10" height="6" fill="#15803d"/>
+    <circle cx="857" cy="430" r="5" fill="#15803d"/>
+    <line x1="857" y1="320" x2="857" y2="425" stroke="#15803d" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Loop back arrow -->
+  <path d="M 1040 400 Q 1080 270 1040 140 L 970 140" stroke="#7c3aed" stroke-width="1.8" fill="none" marker-end="url(#arrowP)"/>
+  <text x="1070" y="272" text-anchor="middle" font-size="10" fill="#7c3aed" transform="rotate(90 1070 272)">loop k -> k+1</text>
+
+  <!-- LEGEND -->
+  <g>
+    <rect x="40"  y="500" width="14" height="14" fill="url(#pickFill)"    stroke="#b45309"/>
+    <text x="58"  y="512" font-size="11" fill="#333">Pick (block circle)</text>
+    <rect x="220" y="500" width="14" height="14" fill="url(#transitFill)" stroke="#0369a1"/>
+    <text x="238" y="512" font-size="11" fill="#333">Transit (joint-space + optional RRT)</text>
+    <rect x="500" y="500" width="14" height="14" fill="url(#placeFill)"   stroke="#15803d"/>
+    <text x="518" y="512" font-size="11" fill="#333">Place (writing line)</text>
+    <circle cx="720" cy="507" r="5" fill="#555"/>
+    <text x="732" y="512" font-size="11" fill="#333">Event marker on timeline</text>
+    <line x1="900" y1="507" x2="920" y2="507" stroke="#7c3aed" stroke-width="1.8"/>
+    <text x="925" y="512" font-size="11" fill="#333">Loop to next char</text>
+  </g>
+
+  <!-- Annotations -->
+  <text x="40" y="395" font-size="10" fill="#666" font-style="italic">
+    Joint updates: IK at each event, cubic ease-in/ease-out between events (C^1). Safe-height traversals avoid table collisions.
+  </text>
+</svg>

@@ -4,6 +4,23 @@
 
 ---
 
+## Motivation & Problem
+
+Robotic handwriting requires a 5-DOF arm to plan collision-free trajectories for writing text. The challenge involves inverse kinematics, smooth trajectory planning, and gripper coordination for pen-up/pen-down movements.
+
+![Robot Setup](docs/diagrams/robot_setup.svg)
+
+---
+
+## KPIs — Impact & Value
+
+| KPI | Impact |
+|-----|--------|
+| Educational tool | Hands-on robotics learning without physical Scorbot hardware |
+| Simulation fidelity | Full 5-DOF kinematics matching real robot behavior |
+| Multi-backend | Same code drives simulation, Arduino steppers, or real Scorbot |
+| Writing modes | Block letters + cursive Bezier — demonstrates trajectory planning |
+
 ## The Problem
 
 A **5-DOF Scorbot III robotic arm** sits at the center of a workspace table. Around it, **26 letter blocks** (A–Z) are arranged on a **circular arc** at a fixed radius from the robot base. Each block occupies a unique angular position, separated by a minimum angular gap to allow the gripper to manipulate them without collisions.
@@ -37,6 +54,14 @@ The result is the text spelled out physically in a straight line.
   <img src="docs/diagrams/solution_flowchart.svg" alt="Solution Flowchart" width="500"/>
 </p>
 
+### Per-Character Pick-and-Place Timeline
+
+The nine-step pipeline executed for each letter is shown below. See [docs/methodology.md §2.2](docs/methodology.md) for the full step table.
+
+<p align="center">
+  <img src="docs/diagrams/pipeline.svg" alt="Pick-and-Place Pipeline Timeline" width="900"/>
+</p>
+
 ### Key Steps
 
 | Phase | Description |
@@ -47,6 +72,54 @@ The result is the text spelled out physically in a straight line.
 | **Pick Cycle** | Open gripper → move above block → lower → close gripper → lift |
 | **Place Cycle** | Move above slot → lower → open gripper → lift |
 | **Completion** | Robot returns to home position |
+
+---
+
+## Frontend
+
+![Frontend](docs/png/frontend.png)
+
+<video src="docs/videos/Working_Sim.mp4" controls width="100%"></video>
+
+---
+
+## Technical Approach — Kinematics & Trajectory
+
+The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
+
+### DH Parameters
+
+| Joint | Name | α (rad) | d (mm) | a (mm) | θ (variable) |
+|-------|------|---------|--------|--------|---------------|
+| 1 | Base | -π/2 | 340 | 16 | θ₁ |
+| 2 | Shoulder | 0 | 0 | 220 | θ₂ |
+| 3 | Elbow | 0 | 0 | 220 | θ₃ |
+| 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
+| 5 | Roll | 0 | 151 | 0 | θ₅ |
+
+### Forward Kinematics — Joint Angles to End-Effector Position
+The forward kinematic chain computes the gripper position and orientation from all five joint angles by cascading DH transformation matrices:
+
+```
+T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
+
+End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
+```
+
+Each **Aᵢ** is a 4x4 homogeneous transformation encoding the rotation and translation of joint i relative to joint i-1, parameterized by the DH values (α, d, a, θ) in the table above. The last column of **T₀₅** gives the Cartesian position of the gripper tip in the base frame.
+
+### Inverse Kinematics — Target Position to Joint Angles
+Given a desired gripper position (qx, qy, qz) and approach direction, the analytical IK solution recovers joint angles without iterative solvers:
+
+```
+θ₁ = atan2(qy, qx)
+θ₃ = arccos((k₁² + k₂² - a₂² - a₃²) / (2·a₂·a₃))
+θ₂ = atan2(sin θ₂, cos θ₂)    (from planar geometry)
+θ₄ = θ₂₃₄ - θ₂ - θ₃
+θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
+```
+
+where **θ₁** is the base rotation (azimuth to target), **θ₃** uses the law of cosines with link lengths **a₂ = a₃ = 220 mm**, and **k₁, k₂** are the radial and vertical offsets from the shoulder. The elbow-up/down ambiguity in θ₃ is resolved by choosing the solution that avoids table collision. Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
 
 ---
 
@@ -67,95 +140,35 @@ The result is the text spelled out physically in a straight line.
 
 ---
 
-## Kinematics
-
-The robot uses the **Denavit-Hartenberg convention** for kinematic modeling:
-
-### DH Parameters
-
-| Joint | Name | α (rad) | d (mm) | a (mm) | θ (variable) |
-|-------|------|---------|--------|--------|---------------|
-| 1 | Base | -π/2 | 340 | 16 | θ₁ |
-| 2 | Shoulder | 0 | 0 | 220 | θ₂ |
-| 3 | Elbow | 0 | 0 | 220 | θ₃ |
-| 4 | Pitch | -π/2 | 0 | 0 | θ₄ |
-| 5 | Roll | 0 | 151 | 0 | θ₅ |
-
-### Forward Kinematics
-
-```
-T₀₅ = A₁ · A₂ · A₃ · A₄ · A₅
-
-End-effector position: p = [T₀₅(1,4), T₀₅(2,4), T₀₅(3,4)]ᵀ
-```
-
-### Inverse Kinematics (Analytical)
-
-```
-θ₁ = atan2(qy, qx)
-θ₃ = arccos((k₁² + k₂² - a₂² - a₃²) / (2·a₂·a₃))
-θ₂ = atan2(sin θ₂, cos θ₂)    (from planar geometry)
-θ₄ = θ₂₃₄ - θ₂ - θ₃
-θ₅ = arcsin(ux·sin θ₁ - uy·cos θ₁)
-```
-
-Full derivation: [docs/equations/kinematics.md](docs/equations/kinematics.md)
-
----
-
-## Project Structure
-
-```
-Udec_Robotic_Writer/
-├── README.md                    # This file
-├── pyproject.toml               # Python project configuration
-├── requirements.txt             # Dependencies
-├── run_frontend.py              # Launch the Dash GUI
-├── run_api.py                   # Launch the FastAPI server
-├── src/
-│   ├── core/
-│   │   ├── kinematics.py        # DH parameters, FK, IK
-│   │   ├── robot.py             # ScorbotIII model, trajectory planning
-│   │   └── writer.py            # Block circle, writing line, pick-and-place
-│   ├── api/
-│   │   └── main.py              # FastAPI REST endpoints
-│   ├── hardware/
-│   │   ├── base.py              # Abstract hardware adapter interface
-│   │   ├── matlab_adapter.py    # MATLAB Engine bridge
-│   │   ├── arduino_adapter.py   # Arduino serial protocol
-│   │   └── serial_adapter.py    # Direct Scorbot III serial
-│   └── frontend/
-│       └── app.py               # Dash interactive GUI
-├── docs/
-│   ├── diagrams/                # SVG diagrams
-│   │   ├── robot_setup.svg      # Physical setup (top view)
-│   │   ├── dh_frames.svg        # DH reference frames
-│   │   ├── solution_flowchart.svg
-│   │   └── system_architecture.svg
-│   ├── equations/
-│   │   └── kinematics.md        # Full mathematical derivation
-│   ├── methodology.md           # Problem statement and approach
-│   └── arduino_firmware.md      # Arduino protocol and example sketch
-├── tests/
-│   └── test_kinematics.py       # Unit tests
-└── legacy/                      # Original MATLAB code (2004/2007)
-    ├── MatlabActual/
-    └── leer.m
-```
-
----
-
-## Frontend
-
-![Frontend](docs/png/frontend.png)
-
-<video src="docs/videos/Working_Sim.mp4" controls width="100%"></video>
+## Demo
 
 ### Video Demo
 
 [![Robotic Writer — YouTube Demo](https://img.youtube.com/vi/ubUdNsb0W-o/0.jpg)](https://youtu.be/ubUdNsb0W-o)
 
-## Getting Started
+---
+
+## Features
+
+- Type any text and click **Run Simulation** to see the robot write it
+- Use the **Animation** controls to play/pause/seek through the trajectory
+- Switch to the **Kinematics** tab to explore forward kinematics interactively
+- Adjust block circle radius, angular separation, and spacing
+- Multiple hardware backends: MATLAB Engine, Arduino serial, direct Scorbot III serial
+
+## Project Metrics & Status
+
+| Metric | Status |
+|--------|--------|
+| Tests | 83 passing |
+| Kinematics | Analytical IK (closed-form, no iteration) |
+| Trajectory | Cubic (C¹) + quintic (C²) smoothstep |
+| Path planning | RRT with 1000-iteration limit + smoothing |
+| Writing | Block (26 chars) + cursive Bezier (26 chars) |
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
@@ -190,12 +203,6 @@ python run_frontend.py
 
 Then open **http://localhost:8055** in your browser.
 
-**Features:**
-- Type any text and click **Run Simulation** to see the robot write it
-- Use the **Animation** controls to play/pause/seek through the trajectory
-- Switch to the **Kinematics** tab to explore forward kinematics interactively
-- Adjust block circle radius, angular separation, and spacing
-
 ### Running the REST API
 
 ```bash
@@ -203,17 +210,6 @@ python run_api.py
 ```
 
 API documentation available at **http://localhost:8005/docs** (Swagger UI).
-
-**Key endpoints:**
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/writer/simulate` | Run full writing simulation |
-| POST | `/api/kinematics/forward` | Compute FK from joint angles |
-| POST | `/api/kinematics/inverse` | Compute IK for target position |
-| GET | `/api/robot/state` | Get current robot state |
-| POST | `/api/hardware/connect` | Connect to hardware adapter |
-| GET | `/api/health` | Health check |
 
 ### Running Both (API + GUI)
 
@@ -233,6 +229,87 @@ python run_frontend.py
 pip install pytest
 pytest tests/ -v
 ```
+
+---
+
+## Project Structure
+
+```
+Udec_Robotic_Writer/
+├── README.md                    # This file
+├── pyproject.toml               # Python project configuration
+├── requirements.txt             # Dependencies
+├── run_frontend.py              # Launch the Dash GUI
+├── run_api.py                   # Launch the FastAPI server
+├── src/
+│   ├── core/
+│   │   ├── kinematics.py        # DH parameters, FK, IK
+│   │   ├── robot.py             # ScorbotIII model, trajectory planning
+│   │   └── writer.py            # Block circle, writing line, pick-and-place
+│   ├── api/
+│   │   └── main.py              # FastAPI REST endpoints
+│   ├── hardware/
+│   │   ├── base.py              # Abstract hardware adapter interface
+│   │   ├── matlab_adapter.py    # MATLAB Engine bridge
+│   │   ├── arduino_adapter.py   # Arduino serial protocol
+│   │   └── serial_adapter.py    # Direct Scorbot III serial
+│   └── frontend/
+│       └── app.py               # Dash interactive GUI
+├── docs/
+│   ├── diagrams/                # SVG diagrams (see architecture.md §8)
+│   │   ├── robot_setup.svg      # Physical setup (top view)
+│   │   ├── dh_frames.svg        # DH reference frames
+│   │   ├── solution_flowchart.svg
+│   │   ├── pipeline.svg         # 9-step pick-and-place timeline
+│   │   └── system_architecture.svg
+│   ├── equations/
+│   │   └── kinematics.md        # Full mathematical derivation
+│   ├── methodology.md           # Problem statement and approach
+│   └── arduino_firmware.md      # Arduino protocol and example sketch
+├── tests/
+│   └── test_kinematics.py       # Unit tests
+└── legacy/                      # Original MATLAB code (2004/2007)
+    ├── MatlabActual/
+    └── leer.m
+```
+
+---
+
+## API Documentation
+
+**Key endpoints:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/writer/simulate` | Run full writing simulation |
+| POST | `/api/kinematics/forward` | Compute FK from joint angles |
+| POST | `/api/kinematics/inverse` | Compute IK for target position |
+| GET | `/api/robot/state` | Get current robot state |
+| POST | `/api/hardware/connect` | Connect to hardware adapter |
+| GET | `/api/health` | Health check |
+
+### Port
+
+**8005** (API) -- http://localhost:8005 | **8055** (GUI) -- http://localhost:8055
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [User Guide](docs/user_guide.md) | Install, GUI tour, API curl example, hardware backends, troubleshooting |
+| [Architecture](docs/architecture.md) | Layered view, request lifecycle, module responsibilities, extension points |
+| [Methodology](docs/methodology.md) | Problem statement, approach, and system design |
+| [Kinematics Equations](docs/equations/kinematics.md) | Complete mathematical derivation of FK/IK |
+| [Arduino Firmware](docs/arduino_firmware.md) | Protocol specification and example Arduino sketch |
+| [Development History](docs/development_history.md) | Reverse-chronological change log |
+| [References](docs/references.md) | External bibliography (Craig, Spong, LaValle, ...) |
+| [DH Frames Diagram](docs/diagrams/dh_frames.svg) | Denavit-Hartenberg reference frames |
+| [Setup Diagram](docs/diagrams/robot_setup.svg) | Physical workspace layout |
+| [Flowchart](docs/diagrams/solution_flowchart.svg) | Solution algorithm flow |
+| [Pipeline Timeline](docs/diagrams/pipeline.svg) | 9-step pick-and-place timeline per character |
+| [Architecture SVG](docs/diagrams/system_architecture.svg) | System component diagram |
 
 ---
 
@@ -282,20 +359,6 @@ adapter.connect(port="COM1", baud=9600)
 adapter.move_motor(1, 500)
 adapter.disconnect()
 ```
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Kinematics Equations](docs/equations/kinematics.md) | Complete mathematical derivation of FK/IK |
-| [Methodology](docs/methodology.md) | Problem statement, approach, and system design |
-| [Arduino Firmware](docs/arduino_firmware.md) | Protocol specification and example Arduino sketch |
-| [DH Frames Diagram](docs/diagrams/dh_frames.svg) | Denavit-Hartenberg reference frames |
-| [Setup Diagram](docs/diagrams/robot_setup.svg) | Physical workspace layout |
-| [Flowchart](docs/diagrams/solution_flowchart.svg) | Solution algorithm flow |
-| [Architecture](docs/diagrams/system_architecture.svg) | System component diagram |
 
 ---
 
