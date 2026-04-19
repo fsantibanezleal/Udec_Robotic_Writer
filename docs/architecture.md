@@ -95,3 +95,25 @@ This lets the same `ScorbotIII` engine drive simulation **or** real hardware by 
 - `test_rrt_planner.py` — path feasibility and smoothing invariants.
 - `test_cursive.py` — character path topology.
 - `test_api.py` — endpoint contracts via FastAPI TestClient.
+
+## 8. Diagram Convention
+
+Every SVG in this repository lives under [`docs/diagrams/`](diagrams/), **not** `docs/svg/` as suggested by the CAOS `project-quality-standards.md` convention. This divergence is intentional and preserved for three reasons:
+
+1. **Semantic clarity** — the word *diagram* better describes the content here (kinematic frames, workspace layouts, timelines) than the generic *svg*, which only names a file format.
+2. **Path stability** — 83 tests, the Dash frontend asset loader, and every `docs/*.md` + `README.md` link reference `docs/diagrams/...`. Renaming the directory would touch ~40 path strings across source, docs, and tests with no functional gain.
+3. **History** — the folder predates the CAOS convention; the original laboratory note from 2004 already labelled its figures as *diagramas*.
+
+**File-naming rules inside `docs/diagrams/` still follow the convention spirit:**
+
+| Role | File |
+|---|---|
+| High-level system blocks | `system_architecture.svg` |
+| End-to-end algorithm flow | `solution_flowchart.svg` |
+| Per-character pick-and-place timeline | `pipeline.svg` |
+| Kinematic reference frames | `dh_frames.svg` |
+| Physical setup (top view) | `robot_setup.svg` |
+| Reachable workspace envelope | `workspace.svg` |
+| Joint-space / task-space trajectory | `trajectory.svg` |
+
+New SVGs must be placed here and listed in both the Documentation table of the README and the most relevant `docs/*.md` reference.

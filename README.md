@@ -54,6 +54,14 @@ The result is the text spelled out physically in a straight line.
   <img src="docs/diagrams/solution_flowchart.svg" alt="Solution Flowchart" width="500"/>
 </p>
 
+### Per-Character Pick-and-Place Timeline
+
+The nine-step pipeline executed for each letter is shown below. See [docs/methodology.md §2.2](docs/methodology.md) for the full step table.
+
+<p align="center">
+  <img src="docs/diagrams/pipeline.svg" alt="Pick-and-Place Pipeline Timeline" width="900"/>
+</p>
+
 ### Key Steps
 
 | Phase | Description |
@@ -248,10 +256,11 @@ Udec_Robotic_Writer/
 │   └── frontend/
 │       └── app.py               # Dash interactive GUI
 ├── docs/
-│   ├── diagrams/                # SVG diagrams
+│   ├── diagrams/                # SVG diagrams (see architecture.md §8)
 │   │   ├── robot_setup.svg      # Physical setup (top view)
 │   │   ├── dh_frames.svg        # DH reference frames
 │   │   ├── solution_flowchart.svg
+│   │   ├── pipeline.svg         # 9-step pick-and-place timeline
 │   │   └── system_architecture.svg
 │   ├── equations/
 │   │   └── kinematics.md        # Full mathematical derivation
@@ -299,6 +308,7 @@ Udec_Robotic_Writer/
 | [DH Frames Diagram](docs/diagrams/dh_frames.svg) | Denavit-Hartenberg reference frames |
 | [Setup Diagram](docs/diagrams/robot_setup.svg) | Physical workspace layout |
 | [Flowchart](docs/diagrams/solution_flowchart.svg) | Solution algorithm flow |
+| [Pipeline Timeline](docs/diagrams/pipeline.svg) | 9-step pick-and-place timeline per character |
 | [Architecture SVG](docs/diagrams/system_architecture.svg) | System component diagram |
 
 ---
