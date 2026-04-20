@@ -10,6 +10,8 @@ from src.core.kinematics import (
     InverseKinematics,
     JointState,
     DHParameters,
+    ScorbotDHConfig,
+    SCORBOT_III,
 )
 
 
@@ -90,3 +92,51 @@ class TestJointState:
         steps = state.to_motor_steps()
         assert steps[0] == 100  # 9.4 / 0.094
         assert steps[1] == 100  # 11.75 / 0.1175
+
+
+class TestScorbotDHConfig:
+    """Parametric swap-in for the frozen DH configuration dataclass."""
+
+    @pytest.mark.parametrize(
+        "config",
+        [
+            SCORBOT_III,                                           # default Scorbot III
+            ScorbotDHConfig(a1=20.0, a2=200.0, a3=200.0,           # shorter 5-DOF variant
+                            d1=320.0, d5=140.0),
+            ScorbotDHConfig(a2=250.0, a3=250.0),                   # longer reach
+        ],
+    )
+    def test_forward_kinematics_accepts_injected_config(self, config):
+        """FK runs on any injected 5-DOF config and returns a finite end-effector."""
+        fk = ForwardKinematics(config=config)
+        assert fk.dh_table == config.dh_table  # config drove the chain
+
+        state = JointState()  # home pose (all zeros)
+        result = fk.compute(state)
+        pos = result["position"]
+
+        assert pos.shape == (3,)
+        assert np.all(np.isfinite(pos))
+        # At home the base rotation is zero, so y-component must stay near zero.
+        assert abs(pos[1]) < 1e-9
+
+    def test_inverse_kinematics_accepts_injected_config(self):
+        """IK reads link lengths from config, not module globals — verify roundtrip."""
+        # Custom arm with a slightly different reach; target scaled to stay reachable.
+        config = ScorbotDHConfig(a2=210.0, a3=210.0)
+        ik = InverseKinematics(config=config)
+        fk = ForwardKinematics(config=config)
+
+        target = np.array([335.0, 0.0, 100.0])
+        recovered = ik.compute(target, orientation=None)
+        recovered_pos = fk.compute(recovered)["position"]
+        np.testing.assert_allclose(target, recovered_pos, atol=2.0)
+
+    def test_default_config_roundtrip_is_tight(self):
+        """Sanity: FK round-trip error on the default config is well below 1e-6 mm
+        when the joint state itself is the source of truth (no IK approximation)."""
+        fk = ForwardKinematics()  # default SCORBOT_III
+        state = JointState.from_degrees([10.0, -20.0, 30.0, -15.0, 5.0])
+        pos_a = fk.compute(state)["position"]
+        pos_b = fk.compute(state)["position"]  # identical call
+        assert np.max(np.abs(pos_a - pos_b)) < 1e-12

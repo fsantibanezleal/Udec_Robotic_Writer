@@ -54,42 +54,76 @@ class DHParameters:
         ])
 
 
-# --- Scorbot III DH Parameters ---
-# Link lengths and offsets in mm (from original MATLAB code)
-L1 = 16.0    # Base link length
-L2 = 220.0   # Shoulder link length
-L3 = 220.0   # Elbow link length
-D1 = 340.0   # Base height offset
-D5 = 151.0   # Wrist-to-gripper offset
+# --- 5-DOF arm DH configuration ---
 
-SCORBOT_DH_TABLE: list[DHParameters] = [
-    DHParameters(alpha=-math.pi / 2, d=D1, a=L1),   # Joint 1 - Base
-    DHParameters(alpha=0.0,          d=0.0, a=L2),   # Joint 2 - Shoulder
-    DHParameters(alpha=0.0,          d=0.0, a=L3),   # Joint 3 - Elbow
-    DHParameters(alpha=-math.pi / 2, d=0.0, a=0.0),  # Joint 4 - Pitch
-    DHParameters(alpha=0.0,          d=D5,  a=0.0),   # Joint 5 - Roll
-]
 
-# Joint limits in degrees [min, max]
-JOINT_LIMITS_DEG: list[tuple[float, float]] = [
-    (-126.5, 126.5),   # Base
-    (-120.0, 63.0),    # Shoulder
-    (-90.0, 90.0),     # Elbow
-    (-250.0, 40.0),    # Pitch
-    (-180.0, 180.0),   # Roll
-]
+@dataclass(frozen=True)
+class ScorbotDHConfig:
+    """Frozen DH configuration for a 5-DOF revolute arm in the Scorbot III family.
 
-# Motor step resolutions (degrees per step)
-MOTOR_STEP_DEG: list[float] = [
-    0.094,    # Motor 1 - Base
-    0.1175,   # Motor 2 - Shoulder
-    0.1175,   # Motor 3 - Elbow
-    0.458,    # Motor 4 - Pitch
-    0.458,    # Motor 5 - Roll
-]
+    Bundles link lengths, joint limits, motor step resolutions, and gripper
+    parameters into one immutable object. The default instance ``SCORBOT_III``
+    reproduces the original Scorbot III geometry; different link lengths can be
+    supplied to experiment with sibling arms without touching the kinematics
+    classes.
 
-GRIPPER_STEPS_PER_MM = 6.7797
-GRIPPER_MAX_APERTURE_MM = 59.0
+    Link lengths / offsets are in millimetres; joint limits in degrees.
+    """
+
+    # Link lengths (mm)
+    a1: float = 16.0     # Base link length
+    a2: float = 220.0    # Shoulder link length
+    a3: float = 220.0    # Elbow link length
+    d1: float = 340.0    # Base height offset
+    d5: float = 151.0    # Wrist-to-gripper offset
+
+    # Joint limits in degrees [min, max] — order: base, shoulder, elbow, pitch, roll
+    joint_limits_deg: tuple[tuple[float, float], ...] = (
+        (-126.5, 126.5),
+        (-120.0, 63.0),
+        (-90.0, 90.0),
+        (-250.0, 40.0),
+        (-180.0, 180.0),
+    )
+
+    # Motor step resolutions (degrees per step)
+    motor_step_deg: tuple[float, ...] = (0.094, 0.1175, 0.1175, 0.458, 0.458)
+
+    # Gripper parameters
+    gripper_steps_per_mm: float = 6.7797
+    gripper_max_aperture_mm: float = 59.0
+
+    @property
+    def dh_table(self) -> list[DHParameters]:
+        """Materialise the per-joint DH row table from this configuration."""
+        return [
+            DHParameters(alpha=-math.pi / 2, d=self.d1, a=self.a1),   # Joint 1 - Base
+            DHParameters(alpha=0.0,          d=0.0,     a=self.a2),   # Joint 2 - Shoulder
+            DHParameters(alpha=0.0,          d=0.0,     a=self.a3),   # Joint 3 - Elbow
+            DHParameters(alpha=-math.pi / 2, d=0.0,     a=0.0),       # Joint 4 - Pitch
+            DHParameters(alpha=0.0,          d=self.d5, a=0.0),       # Joint 5 - Roll
+        ]
+
+
+# Default Scorbot III configuration (values from the original MATLAB driver).
+SCORBOT_III = ScorbotDHConfig()
+
+# --- Backwards-compatible module-level aliases ---
+# Kept so existing imports (other modules, tests, scripts) continue to work.
+L1 = SCORBOT_III.a1
+L2 = SCORBOT_III.a2
+L3 = SCORBOT_III.a3
+D1 = SCORBOT_III.d1
+D5 = SCORBOT_III.d5
+
+SCORBOT_DH_TABLE: list[DHParameters] = SCORBOT_III.dh_table
+
+JOINT_LIMITS_DEG: list[tuple[float, float]] = list(SCORBOT_III.joint_limits_deg)
+
+MOTOR_STEP_DEG: list[float] = list(SCORBOT_III.motor_step_deg)
+
+GRIPPER_STEPS_PER_MM = SCORBOT_III.gripper_steps_per_mm
+GRIPPER_MAX_APERTURE_MM = SCORBOT_III.gripper_max_aperture_mm
 
 
 @dataclass
@@ -141,8 +175,17 @@ class ForwardKinematics:
     The end-effector position is extracted from the last column of T_total.
     """
 
-    def __init__(self, dh_table: Optional[list[DHParameters]] = None):
-        self.dh_table = dh_table or SCORBOT_DH_TABLE
+    def __init__(
+        self,
+        dh_table: Optional[list[DHParameters]] = None,
+        config: Optional[ScorbotDHConfig] = None,
+    ):
+        """Args:
+            dh_table: Explicit per-joint DH rows (takes precedence if given).
+            config: Frozen DH configuration; defaults to ``SCORBOT_III``.
+        """
+        self.config = config or SCORBOT_III
+        self.dh_table = dh_table if dh_table is not None else self.config.dh_table
 
     def compute(self, joint_state: JointState) -> dict:
         """Compute the full forward kinematics.
@@ -191,9 +234,18 @@ class InverseKinematics:
     5. theta4 = theta234 - theta2 - theta3
     """
 
-    def __init__(self, dh_table: Optional[list[DHParameters]] = None):
-        self.dh_table = dh_table or SCORBOT_DH_TABLE
-        self.fk = ForwardKinematics(dh_table)
+    def __init__(
+        self,
+        dh_table: Optional[list[DHParameters]] = None,
+        config: Optional[ScorbotDHConfig] = None,
+    ):
+        """Args:
+            dh_table: Explicit per-joint DH rows (takes precedence if given).
+            config: Frozen DH configuration; defaults to ``SCORBOT_III``.
+        """
+        self.config = config or SCORBOT_III
+        self.dh_table = dh_table if dh_table is not None else self.config.dh_table
+        self.fk = ForwardKinematics(dh_table=dh_table, config=self.config)
 
     def compute(
         self,
@@ -215,8 +267,8 @@ class InverseKinematics:
         """
         qx, qy, qz = float(target_xyz[0]), float(target_xyz[1]), float(target_xyz[2])
 
-        a1, a2, a3 = L1, L2, L3
-        d1, d5 = D1, D5
+        a1, a2, a3 = self.config.a1, self.config.a2, self.config.a3
+        d1, d5 = self.config.d1, self.config.d5
 
         if orientation is None:
             # Default: gripper pointing down, approach from above
