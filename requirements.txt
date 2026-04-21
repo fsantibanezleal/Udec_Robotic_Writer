@@ -6,3 +6,9 @@ dash>=2.15
 dash-bootstrap-components>=1.5
 plotly>=5.18
 pyserial>=3.5
+
+# Production WSGI server for the Dash frontend. The repo's run_frontend.py
+# uses `app.run(debug=True)` which is dev-only. Hosted deployments run
+# `gunicorn src.frontend.app:server` so they need this pinned in the
+# reproducible requirements set rather than installed ad-hoc on each host.
+gunicorn>=21.2
