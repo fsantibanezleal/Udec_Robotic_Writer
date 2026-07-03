@@ -1,5 +1,7 @@
 # Robotic Writer
 
+[![License](https://img.shields.io/github/license/fsantibanezleal/Udec_Robotic_Writer)](LICENSE)
+
 > **Origin**: This project is based on a laboratory activity from the first Automatic Control course (**Control Automatico I**) taken at the **Universidad de Concepcion** (Chile) around **2004**. The original assignment involved programming a Scorbot III robotic arm to pick letter blocks arranged in a circular arc and place them in a line to spell words — a hands-on introduction to robot kinematics, trajectory planning, and serial communication. This modernized version preserves the original concept while providing a full simulation environment, REST API, and support for multiple hardware backends.
 
 ---
